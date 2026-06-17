@@ -1,4 +1,4 @@
-package Servidor.controller;
+package controller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -110,11 +110,11 @@ public class GerenciadorGrupos {
 	 * console.
 	 */
 	public synchronized void imprimirEstado() {
-		System.out.println("\n══════ ESTADO DA ED ══════");
+		System.out.println("\nESTADO DA ED ");
 		for (Map.Entry<String, List<InfoUser>> entry : gruposExistentes.entrySet()) {
 			System.out.println("  [" + entry.getKey() + "] → " + entry.getValue());
 		}
-		System.out.println("══════════════════════════\n");
+		System.out.println("\n");
 	} // fim imprimirEstado
 
 }// fim da class

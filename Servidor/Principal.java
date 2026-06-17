@@ -1,6 +1,4 @@
-package Servidor;
-
-import Servidor.model.Servidor;
+import model.Servidor;
 
 /**
  * Ponto de entrada da aplicacao do servidor

@@ -1,6 +1,4 @@
-package Cliente;
-
-import Cliente.model.Cliente;
+import model.Cliente;
 
 /**
  * Ponto de entrada da aplicacao do Cliente.

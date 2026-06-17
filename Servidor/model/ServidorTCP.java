@@ -1,10 +1,10 @@
-package Servidor.model;
+package model;
 
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import Servidor.controller.GerenciadorGrupos;
-import Servidor.controller.AtendimentoCliente;
+import controller.GerenciadorGrupos;
+import controller.AtendimentoCliente;
 
 /**
  * Classe responsavel por gerar a conexao TCP entre cliente e servidor.

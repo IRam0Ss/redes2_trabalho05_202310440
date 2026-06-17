@@ -1,11 +1,11 @@
-package Servidor.model;
+package model;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.List;
 
-import Servidor.controller.GerenciadorGrupos;
+import controller.GerenciadorGrupos;
 import utils.APDU;
 import utils.InfoUser;
 import utils.Protocolo;

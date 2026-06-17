@@ -1,4 +1,4 @@
-package Cliente.model;
+package model;
 
 import java.net.InetAddress;
 import java.util.Scanner;
@@ -27,9 +27,9 @@ public class Cliente {
 
         try {
             // 1. Configuracoes Iniciais
-            System.out.println("╔════════════════════════════════════════╗");
-            System.out.println("║          BEM-VINDO AO CHAT             ║");
-            System.out.println("╚════════════════════════════════════════╝");
+            System.out.println("==========================================");
+            System.out.println("            BEM-VINDO AO CHAT             ");
+            System.out.println("==========================================");
             System.out.print("Digite seu nome: ");
             String nome = scanner.nextLine();
 

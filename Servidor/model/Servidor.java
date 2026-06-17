@@ -1,6 +1,6 @@
-package Servidor.model;
+package model;
 
-import Servidor.controller.GerenciadorGrupos;
+import controller.GerenciadorGrupos;
 
 /**
  * Classe responsavel por iniciar o servidor, gerenciando as threads do
