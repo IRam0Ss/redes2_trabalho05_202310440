@@ -1,0 +1,80 @@
+package Cliente.model;
+
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+
+import utils.APDU;
+import utils.InfoUser;
+
+public class ClienteUDP implements Runnable {
+
+	private int portaServidor;
+	private final InetAddress IP_SERVIDOR;
+	private DatagramSocket socketUDP;
+	private static final int BUFFER = 4096;
+
+	public ClienteUDP(String ipServidor, int portaServidor, int portaCliente)
+			throws UnknownHostException, SocketException {
+		this.IP_SERVIDOR = InetAddress.getByName(ipServidor);
+		this.portaServidor = portaServidor;
+
+		socketUDP = new DatagramSocket(portaCliente);
+
+		System.out.println("Conexao UDP cliente criada na porta " + portaCliente);
+	}
+
+	/**
+	 * Monta uma APDU do tipo SEND e envia ao servidor.
+	 * 
+	 * @param nomeGrupo Nome do grupo.
+	 * @param mensagem  Mensagem a ser enviada.
+	 */
+	public void send(String nomeGrupo, InfoUser usuario, String mensagem) {
+		// montar apdu
+		String apdu = APDU.montarSend(nomeGrupo, usuario, mensagem);
+		byte[] dadosEnviados = apdu.getBytes();
+
+		DatagramPacket pacoteEnvio = new DatagramPacket(dadosEnviados, dadosEnviados.length, IP_SERVIDOR, portaServidor);
+		try {
+			socketUDP.send(pacoteEnvio);
+			System.out.println("[C_UDP] Mensagem enviada ao servidor.");
+		} catch (IOException e) {
+			System.out.println("[C_UDP] Falha ao enviar mensagem para o servidor.");
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Responsavel pela recepcao de mensagens enviadas pelo servidor
+	 */
+	public void run() {
+		byte[] bufferRecepcao = new byte[BUFFER];
+
+		while (!socketUDP.isClosed()) {
+			DatagramPacket pacoteRecebido = new DatagramPacket(bufferRecepcao, bufferRecepcao.length);
+			try {
+				socketUDP.receive(pacoteRecebido);
+				String apdu = new String(pacoteRecebido.getData(), 0, pacoteRecebido.getLength());
+				InfoUser usuario = APDU.extrairUsuario(apdu);
+				String mensagem = APDU.extrairMensagem(apdu);
+				System.out.println("\n" + usuario.toString() + " enviou: " + mensagem);
+
+			} catch (SocketException e) {
+				// Excecao esperada ao fechar o socket durante o receive
+			} catch (IOException e) {
+				System.out.println("[C_UDP] Falha ao receber mensagem do servidor.");
+				e.printStackTrace();
+			}
+		}
+
+	}
+
+	public void fecharConexao() {
+		this.socketUDP.close();
+	}
+
+}
