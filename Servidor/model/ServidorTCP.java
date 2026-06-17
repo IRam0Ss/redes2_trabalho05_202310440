@@ -25,7 +25,7 @@ public class ServidorTCP implements Runnable {
 	@Override
 	public void run() {
 		try (ServerSocket servidorTCP = new ServerSocket(porta)) {
-			System.out.println("Servidor TCP rodando na porta " + porta);
+			System.out.println("[TCP] escutando a porta " + porta);
 
 			while (true) { // mantem a conexao existente sempre esperando clientes se conectarem
 				Socket conexaoClienteTCP = servidorTCP.accept(); // conexao do cliente com o servidor

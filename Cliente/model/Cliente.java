@@ -58,25 +58,32 @@ public class Cliente {
             boolean rodando = true;
             while (rodando) {
                 String input = scanner.nextLine();
-                if (input.trim().isEmpty()) continue;
+                if (input.trim().isEmpty())
+                    continue;
 
                 String[] partes = input.split(" ", 3); // quebra o comando em ate 3 partes
                 String comando = partes[0].toLowerCase();
 
                 switch (comando) {
                     case "/join":
-                        if (partes.length >= 2) tcp.join(partes[1], eu);
-                        else System.out.println("Uso correto: /join <grupo>");
+                        if (partes.length >= 2)
+                            tcp.join(partes[1], eu);
+                        else
+                            System.out.println("Uso correto: /join <grupo>");
                         break;
 
                     case "/leave":
-                        if (partes.length >= 2) tcp.leave(partes[1], eu);
-                        else System.out.println("Uso correto: /leave <grupo>");
+                        if (partes.length >= 2)
+                            tcp.leave(partes[1], eu);
+                        else
+                            System.out.println("Uso correto: /leave <grupo>");
                         break;
 
                     case "/send":
-                        if (partes.length >= 3) udp.send(partes[1], eu, partes[2]);
-                        else System.out.println("Uso correto: /send <grupo> <mensagem>");
+                        if (partes.length >= 3)
+                            udp.send(partes[1], eu, partes[2]);
+                        else
+                            System.out.println("Uso correto: /send <grupo> <mensagem>");
                         break;
 
                     case "/sair":
