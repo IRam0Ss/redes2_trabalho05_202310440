@@ -13,13 +13,11 @@ import utils.InfoUser;
 public class Cliente {
 
     private String ipServidor;
-    private int portaServidorTCP;
-    private int portaServidorUDP;
+    private int portaServidor;
 
-    public Cliente(String ipServidor, int portaServidorTCP, int portaServidorUDP) {
+    public Cliente(String ipServidor, int portaServidor) {
         this.ipServidor = ipServidor;
-        this.portaServidorTCP = portaServidorTCP;
-        this.portaServidorUDP = portaServidorUDP;
+        this.portaServidor = portaServidor;
     }
 
     public void iniciar() {
@@ -33,16 +31,16 @@ public class Cliente {
             System.out.print("Digite seu nome: ");
             String nome = scanner.nextLine();
 
-            System.out.print("Digite a porta UDP que voce vai usar (ex: 7001): ");
-            int minhaPortaUDP = Integer.parseInt(scanner.nextLine());
+            // 2. Inicializando a conexao UDP primeiro (para o SO escolher uma porta aleatoria livre)
+            ClienteUDP udp = new ClienteUDP(ipServidor, portaServidor);
+            int minhaPortaUDP = udp.getPortaLocal();
 
             // Pega o IP local da maquina automaticamente
             String meuIp = InetAddress.getLocalHost().getHostAddress();
             InfoUser eu = new InfoUser(nome, meuIp, minhaPortaUDP);
 
-            // 2. Inicializando as conexoes com o Servidor
-            ClienteTCP tcp = new ClienteTCP(ipServidor, portaServidorTCP);
-            ClienteUDP udp = new ClienteUDP(ipServidor, portaServidorUDP, minhaPortaUDP);
+            // 3. Inicializando a conexao TCP com o Servidor
+            ClienteTCP tcp = new ClienteTCP(ipServidor, portaServidor);
 
             // 3. Iniciando a thread que escuta mensagens recebidas via UDP
             Thread threadRecepcao = new Thread(udp);

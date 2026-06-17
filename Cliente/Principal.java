@@ -1,5 +1,7 @@
 import model.Cliente;
 
+import utils.Protocolo;
+
 /**
  * Ponto de entrada da aplicacao do Cliente.
  */
@@ -9,8 +11,6 @@ public class Principal {
 
 		// Configuracoes padrao apontando para o servidor local
 		String ipServidor = "127.0.0.1";
-		int portaServidorTCP = 5000;
-		int portaServidorUDP = 5001;
 
 		// Opcional: Se quiser permitir passar o IP do servidor por parametro no
 		// terminal
@@ -18,7 +18,7 @@ public class Principal {
 			ipServidor = args[0];
 		}
 
-		Cliente cliente = new Cliente(ipServidor, portaServidorTCP, portaServidorUDP);
+		Cliente cliente = new Cliente(ipServidor, Protocolo.PORTA_SERVIDOR);
 		cliente.iniciar();
 
 	}

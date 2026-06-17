@@ -10,6 +10,9 @@ public class Protocolo {
     public static final String LEAVE = "LEAVE";
     public static final String SEND = "SEND";
 
+    // porta padrao do servidor
+    public static final int PORTA_SERVIDOR = 5000;
+
     // separador (flags)
     public static final String SEPARADOR_CAMPO_APDU = "~/";
 

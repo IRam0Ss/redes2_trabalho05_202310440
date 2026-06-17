@@ -17,14 +17,22 @@ public class ClienteUDP implements Runnable {
 	private DatagramSocket socketUDP;
 	private static final int BUFFER = 4096;
 
-	public ClienteUDP(String ipServidor, int portaServidor, int portaCliente)
+	public ClienteUDP(String ipServidor, int portaServidor)
 			throws UnknownHostException, SocketException {
 		this.IP_SERVIDOR = InetAddress.getByName(ipServidor);
 		this.portaServidor = portaServidor;
 
-		socketUDP = new DatagramSocket(portaCliente);
+		// Construtor sem passar porta -> O Sistema Operacional escolhe uma porta livre!
+		socketUDP = new DatagramSocket();
 
-		System.out.println("Conexao UDP cliente criada na porta " + portaCliente);
+		System.out.println("Conexao UDP cliente criada na porta " + socketUDP.getLocalPort());
+	}
+
+	/**
+	 * Retorna a porta aleatoria que o Sistema Operacional atribuiu ao socket
+	 */
+	public int getPortaLocal() {
+		return socketUDP.getLocalPort();
 	}
 
 	/**
