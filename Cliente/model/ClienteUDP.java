@@ -46,7 +46,8 @@ public class ClienteUDP implements Runnable {
 		String apdu = APDU.montarSend(nomeGrupo, usuario, mensagem);
 		byte[] dadosEnviados = apdu.getBytes();
 
-		DatagramPacket pacoteEnvio = new DatagramPacket(dadosEnviados, dadosEnviados.length, IP_SERVIDOR, portaServidor);
+		DatagramPacket pacoteEnvio = new DatagramPacket(dadosEnviados, dadosEnviados.length, IP_SERVIDOR,
+				portaServidor);
 		try {
 			socketUDP.send(pacoteEnvio);
 			System.out.println("[CLIENTE:UDP] [INFO] Mensagem enviada ao servidor.");
@@ -69,7 +70,8 @@ public class ClienteUDP implements Runnable {
 				String apdu = new String(pacoteRecebido.getData(), 0, pacoteRecebido.getLength());
 				InfoUser usuario = APDU.extrairUsuario(apdu);
 				String mensagem = APDU.extrairMensagem(apdu);
-				System.out.println("\n[CLIENTE:UDP] [INFO] Nova mensagem recebida:\n" + usuario.toString() + " enviou: " + mensagem);
+				System.out.println("\n[CLIENTE:UDP] [INFO] Nova mensagem recebida:\n" + usuario.toString() + " enviou: "
+						+ mensagem);
 
 			} catch (SocketException e) {
 				// Excecao esperada ao fechar o socket durante o receive
