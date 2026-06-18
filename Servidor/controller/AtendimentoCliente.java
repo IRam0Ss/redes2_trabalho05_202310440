@@ -2,7 +2,10 @@ package controller;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import utils.APDU;
 import utils.InfoUser;
 import utils.Protocolo;
@@ -16,10 +19,18 @@ public class AtendimentoCliente implements Runnable {
 
 	private Socket conexao;
 	private GerenciadorGrupos gerenciador;
+	private InfoUser usuarioAssociado = null;
+	private List<String> gruposAssociados = new ArrayList<>();
+	private PrintWriter escritorSaida;
 
 	public AtendimentoCliente(Socket conexao, GerenciadorGrupos gerenciador) {
 		this.conexao = conexao;
 		this.gerenciador = gerenciador;
+		try {
+			this.escritorSaida = new PrintWriter(conexao.getOutputStream(), true);
+		} catch (Exception e) {
+			System.err.println("[ATENDIMENTO] [ERROR] Falha ao criar escritor TCP: " + e.getMessage());
+		}
 	}
 
 	@Override
@@ -35,6 +46,11 @@ public class AtendimentoCliente implements Runnable {
 		} catch (Exception e) {
 			System.err.println("[ATENDIMENTO] [INFO] Conexao encerrada com o cliente.");
 		} finally {
+			if (this.usuarioAssociado != null) { // remove o usuario de todos os grupos quando ele sai
+				for (String grupo : this.gruposAssociados) {
+					this.gerenciador.leave(grupo, this.usuarioAssociado);
+				}
+			}
 			try {
 				this.conexao.close();
 			} catch (Exception e) {
@@ -61,12 +77,23 @@ public class AtendimentoCliente implements Runnable {
 			case Protocolo.JOIN:
 				String grupoJoin = APDU.extrairGrupo(apdu);
 				InfoUser usuarioJoin = APDU.extrairUsuario(apdu);
+
+				if (this.usuarioAssociado == null) {
+					this.usuarioAssociado = usuarioJoin;
+				}
+
 				boolean checkJoin = this.gerenciador.join(grupoJoin, usuarioJoin);
 				if (checkJoin) {
+					if (!this.gruposAssociados.contains(grupoJoin)) {
+						this.gruposAssociados.add(grupoJoin);
+					}
+					escritorSaida.println("OK~/Entrou no grupo " + grupoJoin);
 					System.out.println("[ATENDIMENTO] [INFO] Processamento de JOIN de '" + usuarioJoin.getNome() + "' concluido.");
 				} else {
+					escritorSaida.println("ERRO~/Voce ja esta no grupo " + grupoJoin);
 					System.out
-							.println("[ATENDIMENTO] [WARNING] Processamento de JOIN de '" + usuarioJoin.getNome() + "' falhou.");
+							.println("[ATENDIMENTO] [WARNING] Processamento de JOIN de '" + usuarioJoin.getNome()
+									+ "' falhou.");
 				}
 				break;
 
@@ -75,11 +102,26 @@ public class AtendimentoCliente implements Runnable {
 				InfoUser usuarioLeave = APDU.extrairUsuario(apdu);
 				boolean checkLeave = this.gerenciador.leave(grupoLeave, usuarioLeave);
 				if (checkLeave) {
-					System.out.println("[ATENDIMENTO] [INFO] Processamento de LEAVE de '" + usuarioLeave.getNome() + "' concluido.");
+					this.gruposAssociados.remove(grupoLeave);
+					escritorSaida.println("OK~/Saiu do grupo " + grupoLeave);
+					System.out.println("[ATENDIMENTO] [INFO] Processamento de LEAVE de '" + usuarioLeave.getNome()
+							+ "' concluido.");
 				} else {
+					escritorSaida.println("ERRO~/Voce nao esta no grupo " + grupoLeave);
 					System.out
-							.println("[ATENDIMENTO] [WARNING] Processamento de LEAVE de '" + usuarioLeave.getNome() + "' falhou.");
+							.println("[ATENDIMENTO] [WARNING] Processamento de LEAVE de '" + usuarioLeave.getNome()
+									+ "' falhou.");
 				}
+				break;
+
+			case Protocolo.LIST:
+				List<String> grupos = this.gerenciador.listarGrupos();
+				if (grupos.isEmpty()) {
+					escritorSaida.println("OK~/Nenhum grupo ativo no momento.");
+				} else {
+					escritorSaida.println("OK~/" + String.join(", ", grupos));
+				}
+				System.out.println("[ATENDIMENTO] [INFO] Processamento de LIST concluido.");
 				break;
 
 			case Protocolo.SEND:

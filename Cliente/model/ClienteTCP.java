@@ -1,12 +1,15 @@
 package model;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
 import utils.APDU;
 import utils.InfoUser;
+import utils.Protocolo;
 
 /**
  * Classe responsavel por realizar a conexao TCP com o servidor
@@ -16,6 +19,7 @@ public class ClienteTCP {
 
 	private final Socket conexaoTCP;
 	private PrintWriter escritorSaida;
+	private BufferedReader leitorEntrada;
 
 	/**
 	 * Construtor que inicializa a conexao TCP com o servidor
@@ -28,6 +32,7 @@ public class ClienteTCP {
 	public ClienteTCP(String ipServidor, int portaServidor) throws UnknownHostException, IOException {
 		this.conexaoTCP = new Socket(ipServidor, portaServidor);
 		this.escritorSaida = new PrintWriter(conexaoTCP.getOutputStream(), true);
+		this.leitorEntrada = new BufferedReader(new InputStreamReader(conexaoTCP.getInputStream()));
 		System.out.println("[CLIENTE:TCP] [INFO] Conectado ao servidor " + ipServidor + ":" + portaServidor);
 	}
 
@@ -37,10 +42,15 @@ public class ClienteTCP {
 	 * @param nomeGrupo Nome do grupo
 	 * @param usuario   Informacoes do usuario
 	 */
-	public void join(String nomeGrupo, InfoUser usuario) {
+	public String join(String nomeGrupo, InfoUser usuario) {
 		String apdu = APDU.montarJoin(nomeGrupo, usuario);
 		escritorSaida.println(apdu);
 		System.out.println("[CLIENTE:TCP] [INFO] JOIN enviado ao servidor: " + usuario.toString());
+		try {
+			return leitorEntrada.readLine();
+		} catch (IOException e) {
+			return "ERRO~/Falha de conexao com o servidor";
+		}
 	}
 
 	/**
@@ -49,10 +59,30 @@ public class ClienteTCP {
 	 * @param nomeGrupo Nome do grupo
 	 * @param usuario   Informacoes do usuario
 	 */
-	public void leave(String nomeGrupo, InfoUser usuario) {
+	public String leave(String nomeGrupo, InfoUser usuario) {
 		String apdu = APDU.montarLeave(nomeGrupo, usuario);
 		escritorSaida.println(apdu);
 		System.out.println("[CLIENTE:TCP] [INFO] LEAVE enviado ao servidor: " + usuario.toString());
+		try {
+			return leitorEntrada.readLine();
+		} catch (IOException e) {
+			return "ERRO~/Falha de conexao com o servidor";
+		}
+	}
+
+	/**
+	 * Solicita a lista de grupos ativos no servidor
+	 * @return Resposta do servidor formatada
+	 */
+	public String list() {
+		// Envia apenas o comando LIST
+		escritorSaida.println(Protocolo.LIST);
+		System.out.println("[CLIENTE:TCP] [INFO] LIST enviado ao servidor");
+		try {
+			return leitorEntrada.readLine();
+		} catch (IOException e) {
+			return "ERRO~/Falha de conexao com o servidor";
+		}
 	}
 
 	public void fecharConexao() {

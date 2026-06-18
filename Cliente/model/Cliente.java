@@ -49,6 +49,7 @@ public class Cliente {
             System.out.println("\nComandos disponiveis:");
             System.out.println("  /join <grupo>            - Entrar em um grupo");
             System.out.println("  /leave <grupo>           - Sair de um grupo");
+            System.out.println("  /list                    - Listar grupos ativos no servidor");
             System.out.println("  /send <grupo> <mensagem> - Enviar mensagem");
             System.out.println("  /sair                    - Encerrar aplicativo\n");
 
@@ -64,17 +65,26 @@ public class Cliente {
 
                 switch (comando) {
                     case "/join":
-                        if (partes.length >= 2)
-                            tcp.join(partes[1], eu);
-                        else
+                        if (partes.length >= 2) {
+                            String resposta = tcp.join(partes[1], eu);
+                            if (resposta != null && resposta.contains("~/")) System.out.println("\n[SISTEMA] " + resposta.split("~/")[1]);
+                        } else {
                             System.out.println("Uso correto: /join <grupo>");
+                        }
                         break;
 
                     case "/leave":
-                        if (partes.length >= 2)
-                            tcp.leave(partes[1], eu);
-                        else
+                        if (partes.length >= 2) {
+                            String resposta = tcp.leave(partes[1], eu);
+                            if (resposta != null && resposta.contains("~/")) System.out.println("\n[SISTEMA] " + resposta.split("~/")[1]);
+                        } else {
                             System.out.println("Uso correto: /leave <grupo>");
+                        }
+                        break;
+
+                    case "/list":
+                        String resList = tcp.list();
+                        if (resList != null && resList.contains("~/")) System.out.println("\n[SISTEMA] Grupos: " + resList.split("~/")[1]);
                         break;
 
                     case "/send":
@@ -97,7 +107,8 @@ public class Cliente {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("ERRO FATAL: " + e.getMessage());
+            e.printStackTrace(System.out);
         } finally {
             scanner.close();
             System.exit(0);

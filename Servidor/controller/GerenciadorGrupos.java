@@ -111,6 +111,15 @@ public class GerenciadorGrupos {
 	} // fim do getMembrosEnvio
 
 	/**
+	 * Retorna a lista de nomes dos grupos atualmente ativos
+	 * 
+	 * @return Lista de strings contendo os nomes dos grupos
+	 */
+	public synchronized List<String> listarGrupos() {
+		return new ArrayList<>(gruposExistentes.keySet());
+	}
+
+	/**
 	 * Imprime o estado atual de todos os grupos e seus respectivos membros no
 	 * console.
 	 */

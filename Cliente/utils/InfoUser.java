@@ -114,7 +114,7 @@ public class InfoUser {
       return false;
     }
     InfoUser comparado = (InfoUser) obj;
-    return this.ip.equals(comparado.ip) && this.porta == comparado.porta;
+    return this.ip.equals(comparado.ip) && this.nome.equals(comparado.nome);
   }
 
   /**
@@ -125,8 +125,7 @@ public class InfoUser {
    */
   @Override
   public int hashCode() {
-    // return (this.ip + ":" + this.porta).hashCode();
-    return Objects.hash(this.ip, this.porta);
+    return Objects.hash(this.ip, this.nome);
   }
 
 } // fim class

@@ -9,6 +9,7 @@ public class Protocolo {
     public static final String JOIN = "JOIN";
     public static final String LEAVE = "LEAVE";
     public static final String SEND = "SEND";
+    public static final String LIST = "LIST";
 
     // porta padrao do servidor
     public static final int PORTA_SERVIDOR = 5000;
