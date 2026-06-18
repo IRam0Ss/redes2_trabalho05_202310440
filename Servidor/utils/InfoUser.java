@@ -1,6 +1,8 @@
 package utils;
 
 import java.util.Objects;
+import java.net.URLEncoder;
+import java.net.URLDecoder;
 
 /**
  * Classe responsavel por armazenar as informacoes dos usuarios conectados
@@ -61,7 +63,12 @@ public class InfoUser {
    * @return String compacta formatada para a APDU.
    */
   public String empacotar() {
-    return this.nome + ";" + this.ip + ";" + this.porta;
+    try {
+      String nomeSeguro = URLEncoder.encode(this.nome, "UTF-8");
+      return nomeSeguro + ";" + this.ip + ";" + this.porta;
+    } catch (Exception e) {
+      return this.nome + ";" + this.ip + ";" + this.porta;
+    }
   }
 
   /**
@@ -82,7 +89,8 @@ public class InfoUser {
       throw new IllegalArgumentException("Formato de usuario invalido na APDU: " + dados);
     }
     try {
-      return new InfoUser(partes[0], partes[1], Integer.parseInt(partes[2]));
+      String nomeDecodificado = URLDecoder.decode(partes[0], "UTF-8");
+      return new InfoUser(nomeDecodificado, partes[1], Integer.parseInt(partes[2]));
     } catch (Exception e) {
       throw new IllegalArgumentException("Porta invalida na APDU: " + partes[2]);
     }

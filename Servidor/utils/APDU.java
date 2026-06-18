@@ -1,5 +1,8 @@
 package utils;
 
+import java.net.URLEncoder;
+import java.net.URLDecoder;
+
 public class APDU {
 
 	// montagem da apdu
@@ -11,7 +14,12 @@ public class APDU {
 	 * @return
 	 */
 	public static String montarJoin(String nomeGrupo, InfoUser usuario) {
-		String join = Protocolo.JOIN + Protocolo.SEPARADOR_CAMPO_APDU + nomeGrupo + Protocolo.SEPARADOR_CAMPO_APDU
+		String grupoSeguro = nomeGrupo;
+		try {
+			grupoSeguro = URLEncoder.encode(nomeGrupo, "UTF-8");
+		} catch (Exception e) {
+		}
+		String join = Protocolo.JOIN + Protocolo.SEPARADOR_CAMPO_APDU + grupoSeguro + Protocolo.SEPARADOR_CAMPO_APDU
 				+ usuario.empacotar();
 
 		return join;
@@ -25,7 +33,12 @@ public class APDU {
 	 * @return
 	 */
 	public static String montarLeave(String nomeGrupo, InfoUser usuario) {
-		String leave = Protocolo.LEAVE + Protocolo.SEPARADOR_CAMPO_APDU + nomeGrupo + Protocolo.SEPARADOR_CAMPO_APDU
+		String grupoSeguro = nomeGrupo;
+		try {
+			grupoSeguro = URLEncoder.encode(nomeGrupo, "UTF-8");
+		} catch (Exception e) {
+		}
+		String leave = Protocolo.LEAVE + Protocolo.SEPARADOR_CAMPO_APDU + grupoSeguro + Protocolo.SEPARADOR_CAMPO_APDU
 				+ usuario.empacotar();
 		return leave;
 	}
@@ -39,8 +52,15 @@ public class APDU {
 	 * @return
 	 */
 	public static String montarSend(String nomeGrupo, InfoUser usuario, String mensagem) {
-		String send = Protocolo.SEND + Protocolo.SEPARADOR_CAMPO_APDU + nomeGrupo + Protocolo.SEPARADOR_CAMPO_APDU
-				+ usuario.empacotar() + Protocolo.SEPARADOR_CAMPO_APDU + mensagem;
+		String grupoSeguro = nomeGrupo;
+		String msgSegura = mensagem;
+		try {
+			grupoSeguro = URLEncoder.encode(nomeGrupo, "UTF-8");
+			msgSegura = URLEncoder.encode(mensagem, "UTF-8");
+		} catch (Exception e) {
+		}
+		String send = Protocolo.SEND + Protocolo.SEPARADOR_CAMPO_APDU + grupoSeguro + Protocolo.SEPARADOR_CAMPO_APDU
+				+ usuario.empacotar() + Protocolo.SEPARADOR_CAMPO_APDU + msgSegura;
 		return send;
 	}
 
@@ -65,7 +85,11 @@ public class APDU {
 	 */
 	public static String extrairGrupo(String apdu) {
 		String grupo = apdu.split(Protocolo.SEPARADOR_CAMPO_APDU)[Protocolo.IDX_GRUPO];
-		return grupo;
+		try {
+			return URLDecoder.decode(grupo, "UTF-8");
+		} catch (Exception e) {
+			return grupo;
+		}
 	}
 
 	/**
@@ -87,7 +111,11 @@ public class APDU {
 	 */
 	public static String extrairMensagem(String apdu) {
 		String mensagem = apdu.split(Protocolo.SEPARADOR_CAMPO_APDU, 4)[Protocolo.IDX_MENSAGEM];
-		return mensagem;
+		try {
+			return URLDecoder.decode(mensagem, "UTF-8");
+		} catch (Exception e) {
+			return mensagem;
+		}
 	}
 
 }// fim APDU

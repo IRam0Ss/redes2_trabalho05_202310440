@@ -67,7 +67,7 @@ public class Cliente {
                     case "/join":
                         if (partes.length >= 2) {
                             String resposta = tcp.join(partes[1], eu);
-                            if (resposta != null && resposta.contains("~/")) System.out.println("\n[SISTEMA] " + resposta.split("~/")[1]);
+                            if (resposta != null && resposta.contains("~/")) System.out.println("\n[SISTEMA] " + resposta.split("~/", 2)[1]);
                         } else {
                             System.out.println("Uso correto: /join <grupo>");
                         }
@@ -76,7 +76,7 @@ public class Cliente {
                     case "/leave":
                         if (partes.length >= 2) {
                             String resposta = tcp.leave(partes[1], eu);
-                            if (resposta != null && resposta.contains("~/")) System.out.println("\n[SISTEMA] " + resposta.split("~/")[1]);
+                            if (resposta != null && resposta.contains("~/")) System.out.println("\n[SISTEMA] " + resposta.split("~/", 2)[1]);
                         } else {
                             System.out.println("Uso correto: /leave <grupo>");
                         }
@@ -84,7 +84,7 @@ public class Cliente {
 
                     case "/list":
                         String resList = tcp.list();
-                        if (resList != null && resList.contains("~/")) System.out.println("\n[SISTEMA] Grupos: " + resList.split("~/")[1]);
+                        if (resList != null && resList.contains("~/")) System.out.println("\n[SISTEMA] Grupos: " + resList.split("~/", 2)[1]);
                         break;
 
                     case "/send":
