@@ -29,7 +29,7 @@ public class ServidorUDP implements Runnable {
 	public void run() {
 		try (DatagramSocket conexaoUDP = new DatagramSocket(this.porta)) {
 
-			System.out.println("[UDP] escutando a porta " + porta);
+			System.out.println("[SERVIDOR:UDP] [INFO] Escutando na porta " + porta);
 			byte[] dadosEntrada = new byte[BUFFER];
 
 			while (true) {
@@ -42,7 +42,7 @@ public class ServidorUDP implements Runnable {
 			}
 
 		} catch (Exception e) {
-			System.err.println("[UDP] Erro: " + e.getMessage());
+			System.err.println("[SERVIDOR:UDP] [ERROR] " + e.getMessage());
 		}
 	}
 
@@ -65,6 +65,8 @@ public class ServidorUDP implements Runnable {
 				InfoUser usuarioRemetente = APDU.extrairUsuario(apdu);
 				String mensagem = APDU.extrairMensagem(apdu);
 
+				System.out.println("[SERVIDOR:UDP] [INFO] Recebido comando SEND do usuario '" + usuarioRemetente.getNome() + "' para o grupo '" + nomeGrupo + "'");
+
 				// montar a string que os clientes alvos vao receber
 				String apduEnviada = APDU.montarSend(nomeGrupo, usuarioRemetente, mensagem);
 
@@ -80,17 +82,17 @@ public class ServidorUDP implements Runnable {
 								membroDestinatario.getPorta());
 
 						conexaoUDP.send(pacoteEnvio);
-						System.out.println("[SEND] → " + membroDestinatario.getNome() + ": " + mensagem);
+						System.out.println("[SERVIDOR:UDP] [INFO] Encaminhando APDU SEND para '" + membroDestinatario.getNome() + "'");
 
 					} catch (Exception e) {
-						System.err.println("[SEND] Falha ao enviar para " + membroDestinatario.getNome());
+						System.err.println("[SERVIDOR:UDP] [ERROR] Falha ao enviar para '" + membroDestinatario.getNome() + "'");
 					}
 				}
 
 				break;
 
 			default:
-				System.out.println("[ERRO] Comando desconhecido: " + comando);
+				System.out.println("[SERVIDOR:UDP] [WARNING] Comando desconhecido: " + comando);
 				break;
 		}
 

@@ -25,7 +25,7 @@ public class ClienteUDP implements Runnable {
 		// Construtor sem passar porta -> O Sistema Operacional escolhe uma porta livre!
 		socketUDP = new DatagramSocket();
 
-		System.out.println("Conexao UDP cliente criada na porta " + socketUDP.getLocalPort());
+		System.out.println("[CLIENTE:UDP] [INFO] Socket vinculado a porta efemera " + socketUDP.getLocalPort());
 	}
 
 	/**
@@ -49,9 +49,9 @@ public class ClienteUDP implements Runnable {
 		DatagramPacket pacoteEnvio = new DatagramPacket(dadosEnviados, dadosEnviados.length, IP_SERVIDOR, portaServidor);
 		try {
 			socketUDP.send(pacoteEnvio);
-			System.out.println("[C_UDP] Mensagem enviada ao servidor.");
+			System.out.println("[CLIENTE:UDP] [INFO] Mensagem enviada ao servidor.");
 		} catch (IOException e) {
-			System.out.println("[C_UDP] Falha ao enviar mensagem para o servidor.");
+			System.out.println("[CLIENTE:UDP] [ERROR] Falha ao enviar mensagem para o servidor.");
 			e.printStackTrace();
 		}
 	}
@@ -69,12 +69,12 @@ public class ClienteUDP implements Runnable {
 				String apdu = new String(pacoteRecebido.getData(), 0, pacoteRecebido.getLength());
 				InfoUser usuario = APDU.extrairUsuario(apdu);
 				String mensagem = APDU.extrairMensagem(apdu);
-				System.out.println("\n" + usuario.toString() + " enviou: " + mensagem);
+				System.out.println("\n[CLIENTE:UDP] [INFO] Nova mensagem recebida:\n" + usuario.toString() + " enviou: " + mensagem);
 
 			} catch (SocketException e) {
 				// Excecao esperada ao fechar o socket durante o receive
 			} catch (IOException e) {
-				System.out.println("[C_UDP] Falha ao receber mensagem do servidor.");
+				System.out.println("[CLIENTE:UDP] [ERROR] Falha ao receber mensagem do servidor.");
 				e.printStackTrace();
 			}
 		}

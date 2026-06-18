@@ -28,7 +28,7 @@ public class ClienteTCP {
 	public ClienteTCP(String ipServidor, int portaServidor) throws UnknownHostException, IOException {
 		this.conexaoTCP = new Socket(ipServidor, portaServidor);
 		this.escritorSaida = new PrintWriter(conexaoTCP.getOutputStream(), true);
-		System.out.println("[C_TCP] Conectado ao servidor " + ipServidor + ":" + portaServidor);
+		System.out.println("[CLIENTE:TCP] [INFO] Conectado ao servidor " + ipServidor + ":" + portaServidor);
 	}
 
 	/**
@@ -40,7 +40,7 @@ public class ClienteTCP {
 	public void join(String nomeGrupo, InfoUser usuario) {
 		String apdu = APDU.montarJoin(nomeGrupo, usuario);
 		escritorSaida.println(apdu);
-		System.out.println("[C_TCP] JOIN enviado ao servidor: " + usuario.toString());
+		System.out.println("[CLIENTE:TCP] [INFO] JOIN enviado ao servidor: " + usuario.toString());
 	}
 
 	/**
@@ -52,16 +52,16 @@ public class ClienteTCP {
 	public void leave(String nomeGrupo, InfoUser usuario) {
 		String apdu = APDU.montarLeave(nomeGrupo, usuario);
 		escritorSaida.println(apdu);
-		System.out.println("[C_TCP] LEAVE enviado ao servidor: " + usuario.toString());
+		System.out.println("[CLIENTE:TCP] [INFO] LEAVE enviado ao servidor: " + usuario.toString());
 	}
 
 	public void fecharConexao() {
 		try {
 			escritorSaida.close();
 			conexaoTCP.close();
-			System.out.println("[C_TCP] Conexao encerrada com o servidor.");
+			System.out.println("[CLIENTE:TCP] [INFO] Conexao encerrada com o servidor.");
 		} catch (IOException e) {
-			System.err.println("[C_TCP] Erro ao fechar conexao: " + e.getMessage());
+			System.err.println("[CLIENTE:TCP] [ERROR] Erro ao fechar conexao: " + e.getMessage());
 		}
 	}
 

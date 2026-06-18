@@ -25,11 +25,11 @@ public class ServidorTCP implements Runnable {
 	@Override
 	public void run() {
 		try (ServerSocket servidorTCP = new ServerSocket(porta)) {
-			System.out.println("[TCP] escutando a porta " + porta);
+			System.out.println("[SERVIDOR:TCP] [INFO] Escutando na porta " + porta);
 
 			while (true) { // mantem a conexao existente sempre esperando clientes se conectarem
 				Socket conexaoClienteTCP = servidorTCP.accept(); // conexao do cliente com o servidor
-				System.out.println("Cliente conectado: " + conexaoClienteTCP.getInetAddress().getHostAddress());
+				System.out.println("[SERVIDOR:TCP] [INFO] Nova conexao recebida de " + conexaoClienteTCP.getInetAddress().getHostAddress());
 
 				// criar uma Thread do servidor para cada cliente unico
 				Thread threadAtendimentoCliente = new Thread(new AtendimentoCliente(conexaoClienteTCP, gerenciador));
@@ -37,7 +37,7 @@ public class ServidorTCP implements Runnable {
 			} // fim while
 
 		} catch (Exception e) {
-			System.err.println("[TCP] Erro: " + e.getMessage());
+			System.err.println("[SERVIDOR:TCP] [ERROR] " + e.getMessage());
 		}
 	}
 

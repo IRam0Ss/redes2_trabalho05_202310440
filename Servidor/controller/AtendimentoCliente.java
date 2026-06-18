@@ -33,7 +33,7 @@ public class AtendimentoCliente implements Runnable {
 				processarAPDU(apduRecebida);
 			}
 		} catch (Exception e) {
-			System.err.println("[AtendimentoCliente] Conexao encerrada: " + e.getMessage());
+			System.err.println("[ATENDIMENTO] [INFO] Conexao encerrada com o cliente.");
 		} finally {
 			try {
 				this.conexao.close();
@@ -51,7 +51,7 @@ public class AtendimentoCliente implements Runnable {
 	private void processarAPDU(String apdu) {
 		String comando = APDU.extrairComando(apdu);
 
-		System.out.println("[TCP] apdu recebida pelo servidor " + comando);
+		System.out.println("[ATENDIMENTO] [INFO] Processando comando " + comando);
 
 		if (comando == null || comando.isEmpty()) {
 			return;
@@ -63,11 +63,10 @@ public class AtendimentoCliente implements Runnable {
 				InfoUser usuarioJoin = APDU.extrairUsuario(apdu);
 				boolean checkJoin = this.gerenciador.join(grupoJoin, usuarioJoin);
 				if (checkJoin) {
-					System.out.println("[TCP] Usuario " + usuarioJoin.getNome() + " conectado ao grupo " + grupoJoin);
+					System.out.println("[ATENDIMENTO] [INFO] Processamento de JOIN de '" + usuarioJoin.getNome() + "' concluido.");
 				} else {
 					System.out
-							.println("[TCP] Nao foi possivel conectar o usuario " + usuarioJoin.getNome() + " ao grupo "
-									+ grupoJoin);
+							.println("[ATENDIMENTO] [WARNING] Processamento de JOIN de '" + usuarioJoin.getNome() + "' falhou.");
 				}
 				break;
 
@@ -76,20 +75,19 @@ public class AtendimentoCliente implements Runnable {
 				InfoUser usuarioLeave = APDU.extrairUsuario(apdu);
 				boolean checkLeave = this.gerenciador.leave(grupoLeave, usuarioLeave);
 				if (checkLeave) {
-					System.out.println("[TCP] Usuario " + usuarioLeave.getNome() + " saiu do grupo " + grupoLeave);
+					System.out.println("[ATENDIMENTO] [INFO] Processamento de LEAVE de '" + usuarioLeave.getNome() + "' concluido.");
 				} else {
 					System.out
-							.println("[TCP] Nao foi possivel remover o usuario " + usuarioLeave.getNome() + " do grupo "
-									+ grupoLeave);
+							.println("[ATENDIMENTO] [WARNING] Processamento de LEAVE de '" + usuarioLeave.getNome() + "' falhou.");
 				}
 				break;
 
 			case Protocolo.SEND:
-				System.out.println("[TCP] apdu send recebida pelo servidor");
+				System.out.println("[ATENDIMENTO] [WARNING] APDU SEND recebida via TCP (ignorando).");
 				break;
 
 			default:
-				System.err.println("[TCP] Comando desconhecido: " + comando);
+				System.err.println("[ATENDIMENTO] [ERROR] Comando desconhecido: " + comando);
 				break;
 		}// fim do switch
 	} // fim do metodo processarAPDU
