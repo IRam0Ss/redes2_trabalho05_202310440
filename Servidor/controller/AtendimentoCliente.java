@@ -50,6 +50,7 @@ public class AtendimentoCliente implements Runnable {
 				for (String grupo : this.gruposAssociados) {
 					this.gerenciador.leave(grupo, this.usuarioAssociado);
 				}
+				this.gerenciador.removerUsuario(this.usuarioAssociado);
 			}
 			try {
 				this.conexao.close();
@@ -95,6 +96,15 @@ public class AtendimentoCliente implements Runnable {
 							.println("[ATENDIMENTO] [WARNING] Processamento de JOIN de '" + usuarioJoin.getNome()
 									+ "' falhou.");
 				}
+				break;
+
+			case Protocolo.REGISTER:
+				InfoUser usuarioRegister = APDU.extrairUsuario(apdu);
+				if (this.usuarioAssociado == null) {
+					this.usuarioAssociado = usuarioRegister;
+				}
+				this.gerenciador.registrarUsuario(usuarioRegister);
+				System.out.println("[ATENDIMENTO] [INFO] Cliente '" + usuarioRegister.getNome() + "' registrado silenciosamente no servidor.");
 				break;
 
 			case Protocolo.LEAVE:

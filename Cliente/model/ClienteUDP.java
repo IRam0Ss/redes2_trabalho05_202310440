@@ -67,6 +67,13 @@ public class ClienteUDP implements Runnable {
 			try {
 				socketUDP.receive(pacoteRecebido);
 				String apdu = new String(pacoteRecebido.getData(), 0, pacoteRecebido.getLength());
+				
+				String comando = APDU.extrairComando(apdu);
+				if (utils.Protocolo.SHUTDOWN.equals(comando)) {
+					System.out.println("\n[SISTEMA] O servidor foi encerrado. A aplicacao sera finalizada.");
+					System.exit(0);
+				}
+
 				InfoUser usuario = APDU.extrairUsuario(apdu);
 				String mensagem = APDU.extrairMensagem(apdu);
 				System.out.println("\n[CLIENTE:UDP] [INFO] Nova mensagem recebida:\n" + usuario.toString() + " enviou: " + mensagem);
@@ -75,6 +82,9 @@ public class ClienteUDP implements Runnable {
 				// Excecao esperada ao fechar o socket durante o receive
 			} catch (IOException e) {
 				System.out.println("[CLIENTE:UDP] [ERROR] Falha ao receber mensagem do servidor.");
+				e.printStackTrace();
+			} catch (Exception e) {
+				System.out.println("[CLIENTE:UDP] [ERROR] Falha ao processar o pacote APDU recebido. Erro interno.");
 				e.printStackTrace();
 			}
 		}

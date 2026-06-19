@@ -1,6 +1,5 @@
 package model;
 
-import java.net.InetAddress;
 import java.util.Scanner;
 
 import utils.InfoUser;
@@ -31,18 +30,23 @@ public class Cliente {
             System.out.print("Digite seu nome: ");
             String nome = scanner.nextLine();
 
-            // 2. Inicializando a conexao UDP primeiro (para o SO escolher uma porta aleatoria livre)
+            // 2. Inicializando a conexao TCP com o Servidor PRIMEIRO
+            // Fazemos isso primeiro para poder descobrir qual IP a nossa maquina esta
+            // usando para falar com o servidor (evitando IPs de VirtualBox/WSL)
+            ClienteTCP tcp = new ClienteTCP(ipServidor, portaServidor);
+
+            // 3. Inicializando a conexao UDP
             ClienteUDP udp = new ClienteUDP(ipServidor, portaServidor);
             int minhaPortaUDP = udp.getPortaLocal();
 
-            // Pega o IP local da maquina automaticamente
-            String meuIp = InetAddress.getLocalHost().getHostAddress();
+            // Pega o IP local da maquina automaticamente baseado na conexao com o servidor
+            String meuIp = tcp.getIpLocal();
             InfoUser eu = new InfoUser(nome, meuIp, minhaPortaUDP);
+            
+            // Registra silenciosamente no servidor para receber avisos assincronos
+            tcp.register(eu);
 
-            // 3. Inicializando a conexao TCP com o Servidor
-            ClienteTCP tcp = new ClienteTCP(ipServidor, portaServidor);
-
-            // 3. Iniciando a thread que escuta mensagens recebidas via UDP
+            // 4. Iniciando a thread que escuta mensagens recebidas via UDP
             Thread threadRecepcao = new Thread(udp);
             threadRecepcao.start();
 
@@ -67,7 +71,8 @@ public class Cliente {
                     case "/join":
                         if (partes.length >= 2) {
                             String resposta = tcp.join(partes[1], eu);
-                            if (resposta != null && resposta.contains("~/")) System.out.println("\n[SISTEMA] " + resposta.split("~/", 2)[1]);
+                            if (resposta != null && resposta.contains("~/"))
+                                System.out.println("\n[SISTEMA] " + resposta.split("~/", 2)[1]);
                         } else {
                             System.out.println("Uso correto: /join <grupo>");
                         }
@@ -76,7 +81,8 @@ public class Cliente {
                     case "/leave":
                         if (partes.length >= 2) {
                             String resposta = tcp.leave(partes[1], eu);
-                            if (resposta != null && resposta.contains("~/")) System.out.println("\n[SISTEMA] " + resposta.split("~/", 2)[1]);
+                            if (resposta != null && resposta.contains("~/"))
+                                System.out.println("\n[SISTEMA] " + resposta.split("~/", 2)[1]);
                         } else {
                             System.out.println("Uso correto: /leave <grupo>");
                         }
@@ -84,7 +90,8 @@ public class Cliente {
 
                     case "/list":
                         String resList = tcp.list();
-                        if (resList != null && resList.contains("~/")) System.out.println("\n[SISTEMA] Grupos: " + resList.split("~/", 2)[1]);
+                        if (resList != null && resList.contains("~/"))
+                            System.out.println("\n[SISTEMA] Grupos: " + resList.split("~/", 2)[1]);
                         break;
 
                     case "/send":

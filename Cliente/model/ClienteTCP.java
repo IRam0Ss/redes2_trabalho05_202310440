@@ -85,6 +85,17 @@ public class ClienteTCP {
 		}
 	}
 
+	/**
+	 * Envia mensagem REGISTER ao servidor para registrar este cliente silenciosamente
+	 * 
+	 * @param usuario Informacoes do usuario (com a porta UDP que ele escuta)
+	 */
+	public void register(InfoUser usuario) {
+		String apdu = Protocolo.REGISTER + Protocolo.SEPARADOR_CAMPO_APDU + "GLOBAL" + Protocolo.SEPARADOR_CAMPO_APDU + usuario.empacotar();
+		escritorSaida.println(apdu);
+		// Nao esperamos resposta do register
+	}
+
 	public void fecharConexao() {
 		try {
 			escritorSaida.close();
@@ -93,6 +104,14 @@ public class ClienteTCP {
 		} catch (IOException e) {
 			System.err.println("[CLIENTE:TCP] [ERROR] Erro ao fechar conexao: " + e.getMessage());
 		}
+	}
+
+	/**
+	 * Obtem o IP local vinculado a esta conexao TCP.
+	 * Isso evita problemas de Firewall e adaptadores virtuais (VirtualBox/Docker).
+	 */
+	public String getIpLocal() {
+		return conexaoTCP.getLocalAddress().getHostAddress();
 	}
 
 } // fim da classe

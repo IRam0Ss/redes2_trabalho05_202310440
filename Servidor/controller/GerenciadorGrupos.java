@@ -14,12 +14,14 @@ import utils.InfoUser;
 public class GerenciadorGrupos {
 
 	private Map<String, List<InfoUser>> gruposExistentes;
+	private java.util.Set<InfoUser> todosUsuariosAtivos;
 
 	/**
 	 * Construtor padrao. Inicializa a estrutura de dados.
 	 */
 	public GerenciadorGrupos() {
 		gruposExistentes = new HashMap<>();
+		todosUsuariosAtivos = new java.util.HashSet<>();
 	}
 
 	/**
@@ -130,5 +132,17 @@ public class GerenciadorGrupos {
 		}
 		System.out.println("\n");
 	} // fim imprimirEstado
+
+	public synchronized void registrarUsuario(InfoUser usuario) {
+		todosUsuariosAtivos.add(usuario);
+	}
+
+	public synchronized void removerUsuario(InfoUser usuario) {
+		todosUsuariosAtivos.remove(usuario);
+	}
+
+	public synchronized java.util.Set<InfoUser> getTodosUsuariosAtivos() {
+		return new java.util.HashSet<>(todosUsuariosAtivos);
+	}
 
 }// fim da class
