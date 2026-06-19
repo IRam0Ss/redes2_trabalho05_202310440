@@ -2,7 +2,6 @@ package utils;
 
 import java.net.URLEncoder;
 import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 
 public class APDU {
 
@@ -18,7 +17,8 @@ public class APDU {
 		String grupoSeguro = nomeGrupo;
 		try {
 			grupoSeguro = URLEncoder.encode(nomeGrupo, "UTF-8");
-		} catch (Exception e) {}
+		} catch (Exception e) {
+		}
 		String join = Protocolo.JOIN + Protocolo.SEPARADOR_CAMPO_APDU + grupoSeguro + Protocolo.SEPARADOR_CAMPO_APDU
 				+ usuario.empacotar();
 
@@ -36,7 +36,8 @@ public class APDU {
 		String grupoSeguro = nomeGrupo;
 		try {
 			grupoSeguro = URLEncoder.encode(nomeGrupo, "UTF-8");
-		} catch (Exception e) {}
+		} catch (Exception e) {
+		}
 		String leave = Protocolo.LEAVE + Protocolo.SEPARADOR_CAMPO_APDU + grupoSeguro + Protocolo.SEPARADOR_CAMPO_APDU
 				+ usuario.empacotar();
 		return leave;
@@ -56,7 +57,8 @@ public class APDU {
 		try {
 			grupoSeguro = URLEncoder.encode(nomeGrupo, "UTF-8");
 			msgSegura = URLEncoder.encode(mensagem, "UTF-8");
-		} catch (Exception e) {}
+		} catch (Exception e) {
+		}
 		String send = Protocolo.SEND + Protocolo.SEPARADOR_CAMPO_APDU + grupoSeguro + Protocolo.SEPARADOR_CAMPO_APDU
 				+ usuario.empacotar() + Protocolo.SEPARADOR_CAMPO_APDU + msgSegura;
 		return send;
