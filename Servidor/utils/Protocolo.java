@@ -12,6 +12,7 @@ public class Protocolo {
     public static final String LIST = "LIST";
     public static final String REGISTER = "REGISTER";
     public static final String SHUTDOWN = "SHUTDOWN";
+    public static final String SENDPVT = "SENDPVT";
 
     // porta padrao do servidor
     public static final int PORTA_SERVIDOR = 5000;

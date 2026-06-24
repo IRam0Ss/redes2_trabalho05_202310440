@@ -86,14 +86,19 @@ public class ClienteTCP {
 	}
 
 	/**
-	 * Envia mensagem REGISTER ao servidor para registrar este cliente silenciosamente
+	 * Envia mensagem REGISTER ao servidor para registrar este cliente
+	 * e validar o nome de usuario.
 	 * 
 	 * @param usuario Informacoes do usuario (com a porta UDP que ele escuta)
 	 */
-	public void register(InfoUser usuario) {
+	public String register(InfoUser usuario) {
 		String apdu = Protocolo.REGISTER + Protocolo.SEPARADOR_CAMPO_APDU + "GLOBAL" + Protocolo.SEPARADOR_CAMPO_APDU + usuario.empacotar();
 		escritorSaida.println(apdu);
-		// Nao esperamos resposta do register
+		try {
+			return leitorEntrada.readLine();
+		} catch (IOException e) {
+			return "ERRO~/Falha de conexao com o servidor";
+		}
 	}
 
 	public void fecharConexao() {

@@ -57,6 +57,27 @@ public class ClienteUDP implements Runnable {
 	}
 
 	/**
+	 * Monta uma APDU do tipo SENDPVT e envia ao servidor.
+	 * 
+	 * @param nomeDestinatario Nome do destinatario.
+	 * @param usuario          InfoUser de quem envia.
+	 * @param mensagem         Mensagem a ser enviada.
+	 */
+	public void sendPvt(String nomeDestinatario, InfoUser usuario, String mensagem) {
+		String apdu = APDU.montarSendPvt(nomeDestinatario, usuario, mensagem);
+		byte[] dadosEnviados = apdu.getBytes();
+
+		DatagramPacket pacoteEnvio = new DatagramPacket(dadosEnviados, dadosEnviados.length, IP_SERVIDOR, portaServidor);
+		try {
+			socketUDP.send(pacoteEnvio);
+			System.out.println("[CLIENTE:UDP] [INFO] Mensagem privada enviada ao servidor.");
+		} catch (IOException e) {
+			System.out.println("[CLIENTE:UDP] [ERROR] Falha ao enviar mensagem privada.");
+			e.printStackTrace();
+		}
+	}
+
+	/**
 	 * Responsavel pela recepcao de mensagens enviadas pelo servidor
 	 */
 	public void run() {
@@ -73,10 +94,17 @@ public class ClienteUDP implements Runnable {
 					System.out.println("\n[SISTEMA] O servidor foi encerrado. A aplicacao sera finalizada.");
 					System.exit(0);
 				}
+				
+				if (utils.Protocolo.SENDPVT.equals(comando)) {
+					InfoUser remetente = APDU.extrairUsuario(apdu);
+					String mensagemPvt = APDU.extrairMensagem(apdu);
+					System.out.println("\n[MENSAGEM PRIVADA] " + remetente.getNome() + " diz: " + mensagemPvt);
+					continue; // Pula o processamento padrao de grupo abaixo
+				}
 
 				InfoUser usuario = APDU.extrairUsuario(apdu);
 				String mensagem = APDU.extrairMensagem(apdu);
-				System.out.println("\n[CLIENTE:UDP] [INFO] Nova mensagem recebida:\n" + usuario.toString() + " enviou: " + mensagem);
+				System.out.println("\n[CLIENTE:UDP] [INFO] Nova mensagem recebida no grupo:\n" + usuario.toString() + " enviou: " + mensagem);
 
 			} catch (SocketException e) {
 				// Excecao esperada ao fechar o socket durante o receive

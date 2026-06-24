@@ -91,6 +91,31 @@ public class ServidorUDP implements Runnable {
 
 				break;
 
+			case Protocolo.SENDPVT:
+				String nomeDestino = APDU.extrairGrupo(apdu);
+				InfoUser remetentePvt = APDU.extrairUsuario(apdu);
+				String msgPvt = APDU.extrairMensagem(apdu);
+
+				System.out.println("[SERVIDOR:UDP] [INFO] Recebido comando SENDPVT de '" + remetentePvt.getNome() + "' para '" + nomeDestino + "'");
+
+				InfoUser destinoInfo = gerenciador.buscarUsuarioPorNome(nomeDestino);
+
+				if (destinoInfo != null) {
+					try {
+						// Repassamos a apdu exata (que o cliente ja montou) para o destino
+						byte[] dadosPvt = apdu.getBytes();
+						InetAddress ipDest = InetAddress.getByName(destinoInfo.getIp());
+						DatagramPacket pacotePvt = new DatagramPacket(dadosPvt, dadosPvt.length, ipDest, destinoInfo.getPorta());
+						conexaoUDP.send(pacotePvt);
+						System.out.println("[SERVIDOR:UDP] [INFO] SENDPVT encaminhado com sucesso para '" + nomeDestino + "'");
+					} catch (Exception e) {
+						System.err.println("[SERVIDOR:UDP] [ERROR] Falha ao encaminhar SENDPVT: " + e.getMessage());
+					}
+				} else {
+					System.out.println("[SERVIDOR:UDP] [WARNING] Destinatario '" + nomeDestino + "' nao encontrado online.");
+				}
+				break;
+
 			default:
 				System.out.println("[SERVIDOR:UDP] [WARNING] Comando desconhecido: " + comando);
 				break;

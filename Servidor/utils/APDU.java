@@ -64,6 +64,27 @@ public class APDU {
 		return send;
 	}
 
+	/**
+	 * Monta a APDU de sendpvt seguindo o protocolo
+	 * 
+	 * @param nomeDestinatario
+	 * @param usuario
+	 * @param mensagem
+	 * @return
+	 */
+	public static String montarSendPvt(String nomeDestinatario, InfoUser usuario, String mensagem) {
+		String destSeguro = nomeDestinatario;
+		String msgSegura = mensagem;
+		try {
+			destSeguro = URLEncoder.encode(nomeDestinatario, "UTF-8");
+			msgSegura = URLEncoder.encode(mensagem, "UTF-8");
+		} catch (Exception e) {
+		}
+		String sendPvt = Protocolo.SENDPVT + Protocolo.SEPARADOR_CAMPO_APDU + destSeguro + Protocolo.SEPARADOR_CAMPO_APDU
+				+ usuario.empacotar() + Protocolo.SEPARADOR_CAMPO_APDU + msgSegura;
+		return sendPvt;
+	}
+
 	// desempacotamento da apdu
 
 	/**

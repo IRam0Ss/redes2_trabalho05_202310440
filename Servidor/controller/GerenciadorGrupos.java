@@ -133,8 +133,15 @@ public class GerenciadorGrupos {
 		System.out.println("\n");
 	} // fim imprimirEstado
 
-	public synchronized void registrarUsuario(InfoUser usuario) {
+	public synchronized boolean registrarUsuario(InfoUser usuario) {
+		for (InfoUser u : todosUsuariosAtivos) {
+			if (u.getNome().equalsIgnoreCase(usuario.getNome())) {
+				System.out.println("[GERENCIADOR] [WARNING] Nome '" + usuario.getNome() + "' ja esta em uso.");
+				return false;
+			}
+		}
 		todosUsuariosAtivos.add(usuario);
+		return true;
 	}
 
 	public synchronized void removerUsuario(InfoUser usuario) {
@@ -143,6 +150,15 @@ public class GerenciadorGrupos {
 
 	public synchronized java.util.Set<InfoUser> getTodosUsuariosAtivos() {
 		return new java.util.HashSet<>(todosUsuariosAtivos);
+	}
+
+	public synchronized InfoUser buscarUsuarioPorNome(String nome) {
+		for (InfoUser u : todosUsuariosAtivos) {
+			if (u.getNome().equalsIgnoreCase(nome)) {
+				return u;
+			}
+		}
+		return null;
 	}
 
 }// fim da class

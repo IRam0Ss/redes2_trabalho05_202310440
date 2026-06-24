@@ -103,8 +103,14 @@ public class AtendimentoCliente implements Runnable {
 				if (this.usuarioAssociado == null) {
 					this.usuarioAssociado = usuarioRegister;
 				}
-				this.gerenciador.registrarUsuario(usuarioRegister);
-				System.out.println("[ATENDIMENTO] [INFO] Cliente '" + usuarioRegister.getNome() + "' registrado silenciosamente no servidor.");
+				boolean registrado = this.gerenciador.registrarUsuario(usuarioRegister);
+				if (registrado) {
+					escritorSaida.println("OK~/Registrado com sucesso");
+					System.out.println("[ATENDIMENTO] [INFO] Cliente '" + usuarioRegister.getNome() + "' registrado silenciosamente no servidor.");
+				} else {
+					escritorSaida.println("ERRO~/Este nome de usuario ja esta em uso. Escolha outro.");
+					System.out.println("[ATENDIMENTO] [WARNING] Registro falhou para '" + usuarioRegister.getNome() + "' - Nome duplicado.");
+				}
 				break;
 
 			case Protocolo.LEAVE:
