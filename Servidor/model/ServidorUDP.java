@@ -94,7 +94,6 @@ public class ServidorUDP implements Runnable {
 			case Protocolo.SENDPVT:
 				String nomeDestino = APDU.extrairGrupo(apdu);
 				InfoUser remetentePvt = APDU.extrairUsuario(apdu);
-				String msgPvt = APDU.extrairMensagem(apdu);
 
 				System.out.println("[SERVIDOR:UDP] [INFO] Recebido comando SENDPVT de '" + remetentePvt.getNome() + "' para '" + nomeDestino + "'");
 
