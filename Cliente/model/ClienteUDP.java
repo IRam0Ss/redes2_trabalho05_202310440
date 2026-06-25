@@ -16,6 +16,7 @@ public class ClienteUDP implements Runnable {
 	private final InetAddress IP_SERVIDOR;
 	private DatagramSocket socketUDP;
 	private static final int BUFFER = 4096;
+	private MessageListener listener;
 
 	public ClienteUDP(String ipServidor, int portaServidor)
 			throws UnknownHostException, SocketException {
@@ -33,6 +34,10 @@ public class ClienteUDP implements Runnable {
 	 */
 	public int getPortaLocal() {
 		return socketUDP.getLocalPort();
+	}
+
+	public void setListener(MessageListener listener) {
+		this.listener = listener;
 	}
 
 	/**
@@ -92,19 +97,22 @@ public class ClienteUDP implements Runnable {
 				String comando = APDU.extrairComando(apdu);
 				if (utils.Protocolo.SHUTDOWN.equals(comando)) {
 					System.out.println("\n[SISTEMA] O servidor foi encerrado. A aplicacao sera finalizada.");
-					System.exit(0);
+					if (listener != null) listener.onShutdown();
+					else System.exit(0);
 				}
 				
 				if (utils.Protocolo.SENDPVT.equals(comando)) {
 					InfoUser remetente = APDU.extrairUsuario(apdu);
 					String mensagemPvt = APDU.extrairMensagem(apdu);
 					System.out.println("\n[MENSAGEM PRIVADA] " + remetente.getNome() + " diz: " + mensagemPvt);
+					if (listener != null) listener.onMessageReceived(remetente, mensagemPvt, true);
 					continue; // Pula o processamento padrao de grupo abaixo
 				}
 
 				InfoUser usuario = APDU.extrairUsuario(apdu);
 				String mensagem = APDU.extrairMensagem(apdu);
 				System.out.println("\n[CLIENTE:UDP] [INFO] Nova mensagem recebida no grupo:\n" + usuario.toString() + " enviou: " + mensagem);
+				if (listener != null) listener.onMessageReceived(usuario, mensagem, false);
 
 			} catch (SocketException e) {
 				// Excecao esperada ao fechar o socket durante o receive

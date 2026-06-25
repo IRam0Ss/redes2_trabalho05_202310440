@@ -18,9 +18,11 @@ public class Servidor {
 
 		Thread tcp = new Thread(new ServidorTCP(Protocolo.PORTA_SERVIDOR, gerenciador));
 		Thread udp = new Thread(new ServidorUDP(Protocolo.PORTA_SERVIDOR, gerenciador));
+		Thread discovery = new Thread(new ServidorDiscovery());
 
 		tcp.start();
 		udp.start();
+		discovery.start();
 
 		System.out.println("=== Servidor IM iniciado ===");
 		System.out.println("TCP e UDP rodando na porta " + Protocolo.PORTA_SERVIDOR);

@@ -140,6 +140,19 @@ public class AtendimentoCliente implements Runnable {
 				System.out.println("[ATENDIMENTO] [INFO] Processamento de LIST concluido.");
 				break;
 
+			case Protocolo.LISTUSERS:
+				java.util.Set<InfoUser> usuarios = this.gerenciador.getTodosUsuariosAtivos();
+				StringBuilder sb = new StringBuilder("OK~/");
+				boolean first = true;
+				for (InfoUser u : usuarios) {
+					if (!first) sb.append(",");
+					sb.append(u.getNome());
+					first = false;
+				}
+				escritorSaida.println(sb.toString());
+				System.out.println("[ATENDIMENTO] [INFO] Processamento de LISTUSERS concluido. Total: " + usuarios.size());
+				break;
+
 			case Protocolo.SEND:
 				System.out.println("[ATENDIMENTO] [WARNING] APDU SEND recebida via TCP (ignorando).");
 				break;

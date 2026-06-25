@@ -1,0 +1,106 @@
+.root {
+    -fx-background-color: #e5e8d7;
+    -fx-font-family: "Segoe UI", "Inter", "Roboto", sans-serif;
+}
+
+.title-text {
+    -fx-font-family: "Impact"; /* Fallback for stencil if not installed */
+    -fx-font-size: 32px;
+    -fx-fill: #5b6623;
+    -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.2), 2, 0, 1, 1);
+}
+
+.btn-eden {
+    -fx-background-color: #c9d873;
+    -fx-text-fill: #3c4516;
+    -fx-font-size: 14px;
+    -fx-background-radius: 20px;
+    -fx-padding: 10px 30px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 2);
+}
+
+.btn-eden:hover {
+    -fx-background-color: #d8e87d;
+}
+
+.btn-eden:pressed {
+    -fx-background-color: #b0bf63;
+    -fx-effect: none;
+    -fx-translate-y: 2px;
+}
+
+.chat-sidebar {
+    -fx-background-color: #c1d269;
+    -fx-padding: 10px;
+}
+
+.chat-main {
+    -fx-background-color: transparent;
+}
+
+.chat-input-bar {
+    -fx-background-color: #a4b455;
+    -fx-padding: 10px;
+}
+
+.chat-input-field {
+    -fx-background-color: transparent;
+    -fx-text-fill: #1a1e0b;
+    -fx-prompt-text-fill: #505828;
+    -fx-font-size: 14px;
+}
+
+.chat-bubble-received {
+    -fx-background-color: #8c9e5e;
+    -fx-text-fill: #1a1e0b;
+    -fx-padding: 12px;
+    -fx-background-radius: 15px 15px 15px 0px;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.chat-bubble-sent {
+    -fx-background-color: #79874c;
+    -fx-text-fill: #1a1e0b;
+    -fx-padding: 12px;
+    -fx-background-radius: 15px 15px 0px 15px;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.chat-scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+.chat-scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.user-item {
+    -fx-background-color: transparent;
+    -fx-padding: 10px;
+}
+.user-item:hover {
+    -fx-background-color: #d1e27a;
+    -fx-background-radius: 10px;
+}
+
+.text-input {
+    -fx-background-color: rgba(255, 255, 255, 0.4);
+    -fx-background-radius: 20px;
+    -fx-padding: 10px;
+}
+
+.text-input:focused {
+    -fx-background-color: rgba(255, 255, 255, 0.6);
+}
+
+.error-overlay {
+    -fx-background-color: rgba(229, 232, 215, 0.85);
+}
+
+.error-box {
+    -fx-background-color: transparent;
+    -fx-alignment: center;
+}

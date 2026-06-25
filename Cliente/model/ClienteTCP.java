@@ -42,7 +42,7 @@ public class ClienteTCP {
 	 * @param nomeGrupo Nome do grupo
 	 * @param usuario   Informacoes do usuario
 	 */
-	public String join(String nomeGrupo, InfoUser usuario) {
+	public synchronized String join(String nomeGrupo, InfoUser usuario) {
 		String apdu = APDU.montarJoin(nomeGrupo, usuario);
 		escritorSaida.println(apdu);
 		System.out.println("[CLIENTE:TCP] [INFO] JOIN enviado ao servidor: " + usuario.toString());
@@ -59,7 +59,7 @@ public class ClienteTCP {
 	 * @param nomeGrupo Nome do grupo
 	 * @param usuario   Informacoes do usuario
 	 */
-	public String leave(String nomeGrupo, InfoUser usuario) {
+	public synchronized String leave(String nomeGrupo, InfoUser usuario) {
 		String apdu = APDU.montarLeave(nomeGrupo, usuario);
 		escritorSaida.println(apdu);
 		System.out.println("[CLIENTE:TCP] [INFO] LEAVE enviado ao servidor: " + usuario.toString());
@@ -74,7 +74,7 @@ public class ClienteTCP {
 	 * Solicita a lista de grupos ativos no servidor
 	 * @return Resposta do servidor formatada
 	 */
-	public String list() {
+	public synchronized String list() {
 		// Envia apenas o comando LIST
 		escritorSaida.println(Protocolo.LIST);
 		System.out.println("[CLIENTE:TCP] [INFO] LIST enviado ao servidor");
@@ -91,9 +91,23 @@ public class ClienteTCP {
 	 * 
 	 * @param usuario Informacoes do usuario (com a porta UDP que ele escuta)
 	 */
-	public String register(InfoUser usuario) {
+	public synchronized String register(InfoUser usuario) {
 		String apdu = Protocolo.REGISTER + Protocolo.SEPARADOR_CAMPO_APDU + "GLOBAL" + Protocolo.SEPARADOR_CAMPO_APDU + usuario.empacotar();
 		escritorSaida.println(apdu);
+		try {
+			return leitorEntrada.readLine();
+		} catch (IOException e) {
+			return "ERRO~/Falha de conexao com o servidor";
+		}
+	}
+
+	/**
+	 * Solicita a lista de usuarios conectados ao servidor
+	 * @return Resposta do servidor com os nomes separados por virgula
+	 */
+	public synchronized String listUsers() {
+		escritorSaida.println(Protocolo.LISTUSERS);
+		System.out.println("[CLIENTE:TCP] [INFO] LISTUSERS enviado ao servidor");
 		try {
 			return leitorEntrada.readLine();
 		} catch (IOException e) {
