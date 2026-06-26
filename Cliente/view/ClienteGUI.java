@@ -167,6 +167,7 @@ public class ClienteGUI extends Application implements MessageListener {
         title.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 10, 0, 0, 4);");
 
         VBox contentBox = new VBox(20);
+        contentBox.setAlignment(Pos.CENTER);
         contentBox.setMaxWidth(650);
         contentBox.setStyle("-fx-background-color: linear-gradient(to bottom right, rgba(229, 232, 215, 0.9), rgba(200, 210, 180, 0.8)); -fx-padding: 30px; -fx-background-radius: 15px; -fx-border-color: #8a9b3a; -fx-border-width: 2px; -fx-border-radius: 15px; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.25), 15, 0, 0, 8);");
         
@@ -184,6 +185,7 @@ public class ClienteGUI extends Application implements MessageListener {
         readme.setTextFill(Color.web("#3f4a23"));
         readme.setAlignment(Pos.CENTER);
         readme.setTextAlignment(TextAlignment.CENTER);
+        readme.setMaxWidth(Double.MAX_VALUE);
         
         contentBox.getChildren().addAll(text, sep, readme);
 
