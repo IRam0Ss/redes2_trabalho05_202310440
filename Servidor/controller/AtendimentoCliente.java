@@ -12,8 +12,8 @@ import utils.Protocolo;
 
 /**
  * Classe responsavel por atender clientes individuais, garantindo que o
- * servidor consiga atender multiplos clientes. Cada APDU eh processada
- * individualmente em uma thread
+ * servidor consiga atender multiplos clientes. Cada APDU e processada
+ * individualmente em uma thread.
  */
 public class AtendimentoCliente implements Runnable {
 
@@ -23,6 +23,12 @@ public class AtendimentoCliente implements Runnable {
 	private List<String> gruposAssociados = new ArrayList<>();
 	private PrintWriter escritorSaida;
 
+	/**
+	 * Construtor do AtendimentoCliente.
+	 * 
+	 * @param conexao Socket TCP da conexao atual
+	 * @param gerenciador Referencia ao gerenciador de grupos e usuarios
+	 */
 	public AtendimentoCliente(Socket conexao, GerenciadorGrupos gerenciador) {
 		this.conexao = conexao;
 		this.gerenciador = gerenciador;
@@ -60,10 +66,10 @@ public class AtendimentoCliente implements Runnable {
 	}
 
 	/**
-	 * processa a apdu recebida pelo servidor e designa o porcessamento para o
-	 * gerenciador
+	 * Processa a APDU recebida pelo servidor e designa o processamento para o
+	 * gerenciador.
 	 * 
-	 * @param apdu apdu recebida
+	 * @param apdu APDU recebida
 	 */
 	private void processarAPDU(String apdu) {
 		String comando = APDU.extrairComando(apdu);
@@ -142,14 +148,18 @@ public class AtendimentoCliente implements Runnable {
 
 			case Protocolo.LISTUSERS:
 				java.util.Set<InfoUser> usuarios = this.gerenciador.getTodosUsuariosAtivos();
+				System.out.println("[ATENDIMENTO] [DEBUG] LISTUSERS: encontrados " + usuarios.size() + " usuarios ativos.");
 				StringBuilder sb = new StringBuilder("OK~/");
 				boolean first = true;
 				for (InfoUser u : usuarios) {
+					System.out.println("[ATENDIMENTO] [DEBUG]   -> Usuario ativo: " + u.toString());
 					if (!first) sb.append(",");
 					sb.append(u.getNome());
 					first = false;
 				}
-				escritorSaida.println(sb.toString());
+				String respostaListUsers = sb.toString();
+				System.out.println("[ATENDIMENTO] [DEBUG] LISTUSERS resposta enviada: " + respostaListUsers);
+				escritorSaida.println(respostaListUsers);
 				System.out.println("[ATENDIMENTO] [INFO] Processamento de LISTUSERS concluido. Total: " + usuarios.size());
 				break;
 

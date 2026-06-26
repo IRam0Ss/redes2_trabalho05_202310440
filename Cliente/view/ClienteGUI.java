@@ -20,10 +20,14 @@ import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
 import javafx.util.Duration;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import model.ClienteTCP;
 import model.ClienteUDP;
@@ -52,6 +56,11 @@ public class ClienteGUI extends Application implements MessageListener {
     private Label lblChatHeader;
     private ListView<String> groupList;
     private ListView<String> onlineUsersList;
+    private HBox chatHeaderBox; // to hold details button
+
+    // New features state
+    private Map<String, Integer> unreadCounts = new HashMap<>();
+    private Map<String, Set<String>> knownGroupMembers = new HashMap<>();
 
     @Override
     public void start(Stage primaryStage) {
@@ -141,9 +150,54 @@ public class ClienteGUI extends Application implements MessageListener {
 
         Button btnSobre = new Button("Sobre");
         btnSobre.getStyleClass().add("btn-eden");
+        btnSobre.setOnAction(e -> switchView(createSobre()));
 
         splash.getChildren().addAll(title1, titleDa, title2, btnEntrar, btnSobre);
         return splash;
+    }
+
+    private Node createSobre() {
+        VBox sobre = new VBox(25);
+        sobre.setAlignment(Pos.CENTER);
+        sobre.setStyle("-fx-background-color: transparent; -fx-padding: 40px;");
+
+        Label title = new Label("E.D.E.N.");
+        title.setFont(Font.font("Impact", FontWeight.BOLD, 48));
+        title.setTextFill(Color.web("#3f4a23"));
+        title.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 10, 0, 0, 4);");
+
+        VBox contentBox = new VBox(20);
+        contentBox.setMaxWidth(650);
+        contentBox.setStyle("-fx-background-color: linear-gradient(to bottom right, rgba(229, 232, 215, 0.9), rgba(200, 210, 180, 0.8)); -fx-padding: 30px; -fx-background-radius: 15px; -fx-border-color: #8a9b3a; -fx-border-width: 2px; -fx-border-radius: 15px; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.25), 15, 0, 0, 8);");
+        
+        Label text = new Label("Seja bem-vindo ao sistema de comunicacao interna do E.D.E.N.. Se voce esta acessando esta interface, sua transicao foi concluida: a partir de agora, voce faz parte do Jardim, e suas vidas nunca mais serao as mesmas. O E.D.E.N. e o presente, o passado e o proprio futuro; nos somos a raiz invisivel que sustenta o novo amanhecer, e hoje voce se torna um membro valioso desta fundacao. Deixamos para tras o que era velho, quebrado e sem proposito para trabalharmos juntos na verdadeira transformacao do mundo. Saiba que voce nao esta aqui por acaso; voce foi cirurgicamente escolhido, e o Conselho esta de olho em cada uma de suas acoes. Use este canal interno com absoluta disciplina para coordenar suas diretrizes entre os outros agentes do Jardim. Lembre-se diariamente da importancia do seu papel nesta engrenagem: nos somos o amanha construido hoje. Nos somos o futuro.");
+        text.setWrapText(true);
+        text.setTextAlignment(TextAlignment.JUSTIFY);
+        text.setFont(Font.font("Consolas", 14));
+        text.setTextFill(Color.web("#1a1e0b"));
+
+        Separator sep = new Separator();
+        sep.setStyle("-fx-background-color: #8a9b3a; -fx-opacity: 0.5;");
+
+        Label readme = new Label("--- TECH README ---\nDesenvolvedor: Iury (202310440)\nProjeto: App de Chat P2P/Server Hibrido\nDisciplina: Redes de Computadores II (UESB)\nProtocolos: TCP (Controle) / UDP (Mensagens)\nInterface: JavaFX (Custom UI)\nAno: 2026");
+        readme.setFont(Font.font("Consolas", FontWeight.BOLD, 13));
+        readme.setTextFill(Color.web("#3f4a23"));
+        readme.setAlignment(Pos.CENTER);
+        readme.setTextAlignment(TextAlignment.CENTER);
+        
+        contentBox.getChildren().addAll(text, sep, readme);
+
+        Label techFooter = new Label("v1.0 | Build 2026");
+        techFooter.setTextAlignment(TextAlignment.CENTER);
+        techFooter.setFont(Font.font("Segoe UI", 12));
+        techFooter.setTextFill(Color.web("#5b6623"));
+
+        Button btnVoltar = new Button("<- Voltar");
+        btnVoltar.getStyleClass().add("btn-eden");
+        btnVoltar.setOnAction(e -> switchView(createSplash()));
+
+        sobre.getChildren().addAll(title, contentBox, techFooter, btnVoltar);
+        return sobre;
     }
 
     // =========================================================================
@@ -353,7 +407,7 @@ public class ClienteGUI extends Application implements MessageListener {
         btnJoin.setOnAction(e -> onJoinGroup());
 
         Button btnLeave = new Button("- Sair");
-        btnLeave.setStyle("-fx-background-color: #c4a05a; -fx-text-fill: #3c3010; -fx-font-size: 11px; -fx-padding: 5px 12px; -fx-background-radius: 15px; -fx-cursor: hand;");
+        btnLeave.setStyle("-fx-background-color: linear-gradient(to bottom, #d4b06a, #c4a05a); -fx-text-fill: #3c3010; -fx-font-size: 11px; -fx-padding: 5px 12px; -fx-background-radius: 20px; -fx-border-color: #a88940; -fx-border-radius: 20px; -fx-border-width: 1px; -fx-cursor: hand; -fx-font-weight: bold;");
         btnLeave.setOnAction(e -> onLeaveGroup());
 
         Button btnListGroups = new Button("Listar Grupos");
@@ -393,13 +447,53 @@ public class ClienteGUI extends Application implements MessageListener {
         btnRefresh.setStyle("-fx-font-size: 11px; -fx-padding: 5px 12px;");
         btnRefresh.setOnAction(e -> refreshOnlineUsers());
 
+        // -- Status de Conexao & Botao Voltar --
+        Separator sep2 = new Separator();
+        sep2.setStyle("-fx-background-color: #8a9b3a;");
+
+        HBox statusBox = new HBox(5);
+        statusBox.setAlignment(Pos.CENTER_LEFT);
+        Circle statusDot = new Circle(4, Color.web("#c9d873"));
+        // Pulsing animation for the dot
+        FadeTransition pulse = new FadeTransition(Duration.seconds(1), statusDot);
+        pulse.setFromValue(0.4);
+        pulse.setToValue(1.0);
+        pulse.setCycleCount(javafx.animation.Animation.INDEFINITE);
+        pulse.setAutoReverse(true);
+        pulse.play();
+
+        Label lblStatus = new Label("Conectado a " + ipServidor);
+        lblStatus.setFont(Font.font("Segoe UI", 11));
+        lblStatus.setTextFill(Color.web("#3f4a23"));
+        statusBox.getChildren().addAll(statusDot, lblStatus);
+
+        Button btnDesconectar = new Button("<- Desconectar");
+        btnDesconectar.setStyle("-fx-background-color: linear-gradient(to bottom, #d4b06a, #c4a05a); -fx-text-fill: #3c3010; -fx-font-size: 11px; -fx-padding: 6px 12px; -fx-background-radius: 20px; -fx-border-color: #a88940; -fx-border-radius: 20px; -fx-border-width: 1px; -fx-cursor: hand; -fx-font-weight: bold;");
+        btnDesconectar.setMaxWidth(Double.MAX_VALUE);
+        btnDesconectar.setOnAction(e -> {
+            if (tcp != null) tcp.fecharConexao();
+            if (udp != null) udp.fecharConexao();
+            tcp = null;
+            udp = null;
+            eu = null;
+            chatHistories.clear();
+            unreadCounts.clear();
+            knownGroupMembers.clear();
+            currentChat = null;
+            chatHeaderBox = null;
+            watermark.setOpacity(0.18); // restore watermark opacity
+            watermark.setVisible(true); // make sure it's visible again
+            switchView(createSplash());
+        });
+
         VBox.setVgrow(groupList, Priority.SOMETIMES);
         VBox.setVgrow(onlineUsersList, Priority.SOMETIMES);
 
         sidebar.getChildren().addAll(
             lblGrupos, groupList, grpBtns, grpBtns2,
             sep,
-            lblUsers, onlineUsersList, btnRefresh
+            lblUsers, onlineUsersList, btnRefresh,
+            sep2, statusBox, btnDesconectar
         );
 
         // ===== AREA CENTRAL DO CHAT =====
@@ -452,7 +546,7 @@ public class ClienteGUI extends Application implements MessageListener {
         HBox.setHgrow(txtMsg, Priority.ALWAYS);
 
         Button btnSend = new Button("Enviar");
-        btnSend.setStyle("-fx-background-color: #3f4a23; -fx-text-fill: #d8e87d; -fx-background-radius: 20px; -fx-padding: 10px 20px; -fx-font-size: 13px; -fx-font-weight: bold; -fx-cursor: hand;");
+        btnSend.setStyle("-fx-background-color: linear-gradient(to bottom, #4f5a2d, #3f4a23); -fx-text-fill: #d8e87d; -fx-background-radius: 20px; -fx-border-color: #5b6623; -fx-border-radius: 20px; -fx-border-width: 1px; -fx-padding: 10px 20px; -fx-font-size: 13px; -fx-font-weight: bold; -fx-cursor: hand;");
 
         btnSend.setOnAction(e -> onSendMessage(txtMsg));
         txtMsg.setOnAction(e -> onSendMessage(txtMsg));
@@ -482,10 +576,33 @@ public class ClienteGUI extends Application implements MessageListener {
                     setOnMouseEntered(null);
                     setOnMouseExited(null);
                 } else {
-                    setText(item);
-                    setFont(Font.font("Segoe UI", 13));
-                    setTextFill(Color.web("#1a1e0b"));
+                    setText(null);
+
+                    HBox row = new HBox();
+                    row.setAlignment(Pos.CENTER_LEFT);
                     
+                    Label nameLbl = new Label(item);
+                    nameLbl.setFont(Font.font("Segoe UI", 13));
+                    nameLbl.setTextFill(Color.web("#1a1e0b"));
+                    HBox.setHgrow(nameLbl, Priority.ALWAYS);
+                    nameLbl.setMaxWidth(Double.MAX_VALUE);
+                    
+                    row.getChildren().add(nameLbl);
+
+                    String mapKey = item;
+                    // if this cell is used for users list, mapKey in unreadCounts might be "[PVT] item"
+                    // we need a way to know if this is from groupList or onlineUsersList
+                    // We can just check both: item or "[PVT] " + item
+                    int unread = unreadCounts.getOrDefault(item, unreadCounts.getOrDefault("[PVT] " + item, 0));
+                    
+                    if (unread > 0) {
+                        Label badge = new Label(String.valueOf(unread));
+                        badge.setStyle("-fx-background-color: #8a9b3a; -fx-text-fill: #e5e8d7; -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 1px 5px; -fx-background-radius: 10px;");
+                        row.getChildren().add(badge);
+                    }
+
+                    setGraphic(row);
+
                     Runnable updateStyle = () -> {
                         if (isSelected()) {
                             setStyle("-fx-background-color: #d1e27a; -fx-background-radius: 8px; -fx-padding: 8px 12px;");
@@ -520,6 +637,10 @@ public class ClienteGUI extends Application implements MessageListener {
                         groupList.getItems().add(grupo);
                     }
                     groupList.getSelectionModel().select(grupo);
+                    addChatBubble(grupo, "SYSTEM", "Voce entrou no grupo " + grupo + ".", false, false, true);
+                    try {
+                        udp.send(grupo, eu, "~JOINED~");
+                    } catch (Exception ex) {}
                 } else if (resposta != null && resposta.startsWith("ERRO~/")) {
                     showErrorOverlay("Erro ao Entrar", resposta.split("~/", 2)[1]);
                 }
@@ -531,11 +652,19 @@ public class ClienteGUI extends Application implements MessageListener {
         String selected = groupList.getSelectionModel().getSelectedItem();
         if (selected == null) return;
 
+        try {
+            udp.send(selected, eu, "~LEFT~");
+        } catch (Exception ex) {}
+
         String resposta = tcp.leave(selected, eu);
         if (resposta != null && resposta.startsWith("OK~/")) {
+            addChatBubble(selected, "SYSTEM", "Voce saiu do grupo.", false, false, true);
+            // We delay removal slightly so the user sees the message? No, if we remove it, the history goes away.
+            // But leaving a group should maybe just remove it from the list.
             groupList.getItems().remove(selected);
             chatHistories.remove(selected);
-            // Switch to empty or first available
+            unreadCounts.remove(selected);
+            knownGroupMembers.remove(selected);
             if (!groupList.getItems().isEmpty()) {
                 groupList.getSelectionModel().selectFirst();
             } else {
@@ -578,6 +707,10 @@ public class ClienteGUI extends Application implements MessageListener {
                                         groupList.getItems().add(grupoEscolhido);
                                     }
                                     groupList.getSelectionModel().select(grupoEscolhido);
+                                    addChatBubble(grupoEscolhido, "SYSTEM", "Voce entrou no grupo " + grupoEscolhido + ".", false, false, true);
+                                    try {
+                                        udp.send(grupoEscolhido, eu, "~JOINED~");
+                                    } catch (Exception ex) {}
                                 } else if (res != null && res.startsWith("ERRO~/")) {
                                     showErrorOverlay("Erro ao Entrar", res.split("~/", 2)[1]);
                                 }
@@ -594,10 +727,13 @@ public class ClienteGUI extends Application implements MessageListener {
     private void refreshOnlineUsers() {
         if (tcp == null) return;
         
+        System.out.println("[GUI] [INFO] Solicitando lista de usuarios online...");
+
         // Executa em thread separada para nao travar a interface
         new Thread(() -> {
             try {
                 String resposta = tcp.listUsers();
+                System.out.println("[GUI] [INFO] Resposta do LISTUSERS: " + resposta);
                 Platform.runLater(() -> {
                     if (resposta != null && resposta.startsWith("OK~/")) {
                         String data = resposta.split("~/", 2)[1];
@@ -611,22 +747,61 @@ public class ClienteGUI extends Application implements MessageListener {
                                 }
                             }
                         }
+                        System.out.println("[GUI] [INFO] Usuarios online atualizados: " + onlineUsersList.getItems().size() + " exibidos.");
+                    } else {
+                        System.out.println("[GUI] [WARNING] Resposta inesperada do LISTUSERS: " + resposta);
                     }
                 });
             } catch (Exception e) {
-                System.out.println("[GUI] Erro ao buscar usuarios online: " + e.getMessage());
+                System.out.println("[GUI] [ERROR] Erro ao buscar usuarios online: " + e.getMessage());
+                e.printStackTrace();
             }
         }).start();
     }
 
     private void switchChatTo(String chatId) {
         currentChat = chatId;
+        
+        // Clear unread counts for this chat
+        if (unreadCounts.containsKey(chatId)) {
+            unreadCounts.remove(chatId);
+            if (chatId.startsWith("[PVT] ")) onlineUsersList.refresh();
+            else groupList.refresh();
+        }
 
         // Animar a troca do header
         FadeTransition headerFade = new FadeTransition(Duration.millis(200), lblChatHeader);
         headerFade.setFromValue(0.3);
         headerFade.setToValue(1.0);
         headerFade.play();
+
+        if (chatHeaderBox == null) {
+            chatHeaderBox = new HBox(10);
+            chatHeaderBox.setAlignment(Pos.CENTER_LEFT);
+            HBox.setHgrow(lblChatHeader, Priority.ALWAYS);
+            lblChatHeader.setMaxWidth(Double.MAX_VALUE);
+            // The header parent is the first HBox in centerArea, but we only have access to lblChatHeader.
+            // Wait, we need to rebuild the header or access its parent. 
+            // It's easier to just assume lblChatHeader's parent is the header HBox.
+            HBox parentHeader = (HBox) lblChatHeader.getParent();
+            parentHeader.getChildren().clear();
+            parentHeader.getChildren().add(lblChatHeader);
+            
+            Button btnDetails = new Button("Detalhes");
+            btnDetails.setStyle("-fx-background-color: transparent; -fx-text-fill: #3f4a23; -fx-font-size: 12px; -fx-cursor: hand; -fx-border-color: #5b6623; -fx-border-radius: 12px; -fx-padding: 4px 10px;");
+            btnDetails.setOnAction(e -> {
+                if (currentChat != null && !currentChat.startsWith("[PVT] ")) {
+                    showGroupDetailsOverlay(currentChat);
+                }
+            });
+            parentHeader.getChildren().add(btnDetails);
+        }
+        
+        // Enable or disable details button based on if it's a group
+        HBox parentHeader = (HBox) lblChatHeader.getParent();
+        if (parentHeader.getChildren().size() > 1) {
+            parentHeader.getChildren().get(1).setVisible(!chatId.startsWith("[PVT] "));
+        }
 
         if (chatId.startsWith("[PVT] ")) {
             lblChatHeader.setText("Mensagem Privada: " + chatId.substring(6));
@@ -661,21 +836,35 @@ public class ClienteGUI extends Application implements MessageListener {
         String msg = txtMsg.getText();
         if (msg == null || msg.trim().isEmpty() || currentChat == null) return;
 
-        if (currentChat.startsWith("[PVT] ")) {
-            String destino = currentChat.substring(6);
-            udp.sendPvt(destino, eu, msg);
-        } else {
-            udp.send(currentChat, eu, msg);
-        }
+        try {
+            if (currentChat.startsWith("[PVT] ")) {
+                String destino = currentChat.substring(6);
+                udp.sendPvt(destino, eu, msg);
+            } else {
+                udp.send(currentChat, eu, msg);
+            }
 
-        addChatBubble(currentChat, eu.getNome() + ": " + msg, true, false);
-        txtMsg.clear();
+            addChatBubble(currentChat, eu.getNome(), msg, true, false, false);
+            txtMsg.clear();
+        } catch (exceptions.ConexaoException e) {
+            showErrorOverlay("Erro de Envio", "Falha ao enviar mensagem: " + e.getMessage());
+        }
     }
 
     // =========================================================================
-    //  BOLHAS DE CHAT
+    //  BOLHAS DE CHAT E DETALHES
     // =========================================================================
-    private void addChatBubble(String chatId, String text, boolean sentByMe, boolean isPrivate) {
+    private Color getColorForName(String name) {
+        int hash = name.hashCode();
+        // Generate a deterministic color in the EDEN palette range
+        int[] palette = {
+            0xc4a05a, 0x8c9e5e, 0x5b6623, 0x79874c, 0xc9d873, 0xa0b050, 0x8a9b3a
+        };
+        int colorHex = palette[Math.abs(hash) % palette.length];
+        return Color.web(String.format("#%06x", colorHex));
+    }
+
+    private void addChatBubble(String chatId, String senderName, String text, boolean sentByMe, boolean isPrivate, boolean isSystem) {
         if (!chatHistories.containsKey(chatId)) {
             VBox newHistory = new VBox(10);
             newHistory.setPadding(new Insets(15));
@@ -684,24 +873,66 @@ public class ClienteGUI extends Application implements MessageListener {
 
         VBox history = chatHistories.get(chatId);
 
-        Label lbl = new Label(text);
-        lbl.setWrapText(true);
-        lbl.setMaxWidth(380);
-        lbl.setFont(Font.font("Segoe UI", 13));
+        HBox row = new HBox();
+        row.setPadding(new Insets(4, 0, 4, 0));
 
-        if (sentByMe) {
-            lbl.setStyle("-fx-background-color: #5b6623; -fx-text-fill: #e5e8d7; -fx-padding: 10px 14px; -fx-background-radius: 14px 14px 2px 14px;");
+        if (isSystem) {
+            Label lblSys = new Label("-- " + text + " --");
+            lblSys.setFont(Font.font("Consolas", 11));
+            lblSys.setTextFill(Color.web("#8a9b3a"));
+            lblSys.setAlignment(Pos.CENTER);
+            row.setAlignment(Pos.CENTER);
+            row.getChildren().add(lblSys);
         } else {
-            lbl.setStyle("-fx-background-color: #8c9e5e; -fx-text-fill: #1a1e0b; -fx-padding: 10px 14px; -fx-background-radius: 14px 14px 14px 2px;");
-            if (isPrivate) {
-                lbl.setStyle("-fx-background-color: #7a8f4a; -fx-text-fill: #e5e8d7; -fx-padding: 10px 14px; -fx-background-radius: 14px 14px 14px 2px; -fx-border-color: #c9d873; -fx-border-width: 1.5px; -fx-border-radius: 14px 14px 14px 2px;");
-            }
-        }
+            VBox bubbleContainer = new VBox(4);
+            bubbleContainer.setMaxWidth(400);
 
-        HBox row = new HBox(lbl);
-        row.setPadding(new Insets(2, 0, 2, 0));
-        if (sentByMe) row.setAlignment(Pos.CENTER_RIGHT);
-        else row.setAlignment(Pos.CENTER_LEFT);
+            // Avatar and Name header
+            HBox header = new HBox(6);
+            header.setAlignment(sentByMe ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT);
+            
+            Circle avatar = new Circle(10, getColorForName(senderName));
+            Label initial = new Label(senderName.substring(0, 1).toUpperCase());
+            initial.setFont(Font.font("Segoe UI", FontWeight.BOLD, 10));
+            initial.setTextFill(Color.web("#1a1e0b"));
+            StackPane avatarStack = new StackPane(avatar, initial);
+
+            Label nameLbl = new Label(senderName);
+            nameLbl.setFont(Font.font("Segoe UI", FontWeight.BOLD, 12));
+            nameLbl.setTextFill(Color.web("#3f4a23"));
+
+            String timestamp = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"));
+            Label timeLbl = new Label(timestamp);
+            timeLbl.setFont(Font.font("Consolas", 10));
+            timeLbl.setTextFill(Color.web("#8a9b3a"));
+
+            if (sentByMe) {
+                header.getChildren().addAll(timeLbl, nameLbl, avatarStack);
+                bubbleContainer.setAlignment(Pos.CENTER_RIGHT);
+            } else {
+                header.getChildren().addAll(avatarStack, nameLbl, timeLbl);
+                bubbleContainer.setAlignment(Pos.CENTER_LEFT);
+            }
+
+            Label lblMsg = new Label(text);
+            lblMsg.setWrapText(true);
+            lblMsg.setFont(Font.font("Segoe UI", 13));
+
+            if (sentByMe) {
+                lblMsg.setStyle("-fx-background-color: rgba(91, 102, 35, 0.9); -fx-text-fill: #e5e8d7; -fx-padding: 10px 14px; -fx-background-radius: 15px 0px 15px 15px; -fx-border-color: #c9d873; -fx-border-width: 0 3px 0 0; -fx-border-radius: 15px 0px 15px 15px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 4, 0, -2, 2);");
+            } else {
+                lblMsg.setStyle("-fx-background-color: rgba(140, 158, 94, 0.9); -fx-text-fill: #1a1e0b; -fx-padding: 10px 14px; -fx-background-radius: 0px 15px 15px 15px; -fx-border-color: #5b6623; -fx-border-width: 0 0 0 3px; -fx-border-radius: 0px 15px 15px 15px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 4, 0, 2, 2);");
+                if (isPrivate) {
+                    lblMsg.setStyle("-fx-background-color: rgba(122, 143, 74, 0.9); -fx-text-fill: #e5e8d7; -fx-padding: 10px 14px; -fx-background-radius: 0px 15px 15px 15px; -fx-border-color: #c9d873; -fx-border-width: 1.5px; -fx-border-radius: 0px 15px 15px 15px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 4, 0, 2, 2);");
+                }
+            }
+
+            bubbleContainer.getChildren().addAll(header, lblMsg);
+            
+            row.getChildren().add(bubbleContainer);
+            if (sentByMe) row.setAlignment(Pos.CENTER_RIGHT);
+            else row.setAlignment(Pos.CENTER_LEFT);
+        }
 
         // Animate entrance
         row.setOpacity(0);
@@ -722,6 +953,87 @@ public class ClienteGUI extends Application implements MessageListener {
 
     // =========================================================================
     //  OVERLAY DE ERRO
+    // =========================================================================
+    //  OVERLAY DE DETALHES DO GRUPO
+    // =========================================================================
+    private void showGroupDetailsOverlay(String grupo) {
+        VBox box = new VBox(15);
+        box.setAlignment(Pos.TOP_CENTER);
+        box.setMaxSize(350, 400);
+        box.setStyle(
+            "-fx-background-color: #e3e6d8;" +
+            "-fx-border-color: #5b6623; -fx-border-width: 2.5px;" +
+            "-fx-background-radius: 12px; -fx-border-radius: 12px;" +
+            "-fx-padding: 30px;" +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 15, 0, 0, 5);"
+        );
+
+        Label lblTitle = new Label("Detalhes do Grupo");
+        lblTitle.setFont(Font.font("Impact", FontWeight.BOLD, 22));
+        lblTitle.setTextFill(Color.web("#5b6623"));
+
+        Label lblGroup = new Label(grupo);
+        lblGroup.setFont(Font.font("Segoe UI", FontWeight.BOLD, 18));
+        lblGroup.setTextFill(Color.web("#3f4a23"));
+
+        Label lblMembers = new Label("Membros Ativos Conhecidos:");
+        lblMembers.setFont(Font.font("Segoe UI", FontWeight.BOLD, 12));
+        lblMembers.setTextFill(Color.web("#5b6623"));
+
+        ListView<String> membersList = new ListView<>();
+        membersList.setStyle("-fx-background-color: rgba(160,176,80,0.2); -fx-background-radius: 8px;");
+        membersList.setCellFactory(lv -> createStyledCell());
+        
+        Set<String> members = knownGroupMembers.getOrDefault(grupo, new HashSet<>());
+        membersList.getItems().add(eu.getNome() + " (Voce)");
+        for (String m : members) {
+            if (!m.equals(eu.getNome())) membersList.getItems().add(m);
+        }
+
+        HBox buttons = new HBox(12);
+        buttons.setAlignment(Pos.CENTER);
+
+        Button btnClose = new Button("Fechar");
+        btnClose.getStyleClass().add("btn-eden");
+
+        Button btnLeave = new Button("Sair do Grupo");
+        btnLeave.setStyle("-fx-background-color: linear-gradient(to bottom, #d4b06a, #c4a05a); -fx-text-fill: #3c3010; -fx-background-radius: 20px; -fx-border-color: #a88940; -fx-border-radius: 20px; -fx-border-width: 1px; -fx-padding: 8px 20px; -fx-font-size: 13px; -fx-font-weight: bold; -fx-cursor: hand;");
+
+        buttons.getChildren().addAll(btnClose, btnLeave);
+
+        box.getChildren().addAll(lblTitle, lblGroup, lblMembers, membersList, buttons);
+
+        StackPane overlay = new StackPane(box);
+        overlay.setStyle("-fx-background-color: rgba(50, 60, 20, 0.55);");
+
+        Runnable closeOverlay = () -> {
+            FadeTransition fadeOut = new FadeTransition(Duration.millis(200), overlay);
+            fadeOut.setFromValue(1);
+            fadeOut.setToValue(0);
+            fadeOut.setOnFinished(ev -> root.getChildren().remove(overlay));
+            fadeOut.play();
+        };
+
+        btnClose.setOnAction(e -> closeOverlay.run());
+        btnLeave.setOnAction(e -> {
+            closeOverlay.run();
+            // Reuse the existing leave logic
+            if (groupList.getItems().contains(grupo)) {
+                groupList.getSelectionModel().select(grupo);
+                onLeaveGroup();
+            }
+        });
+
+        overlay.setOpacity(0);
+        root.getChildren().add(overlay);
+        FadeTransition fadeIn = new FadeTransition(Duration.millis(200), overlay);
+        fadeIn.setFromValue(0);
+        fadeIn.setToValue(1);
+        fadeIn.play();
+    }
+
+    // =========================================================================
+    //  OVERLAY DE ERRO (substitui Alert)
     // =========================================================================
     private void showErrorOverlay(String title, String message) {
         VBox errorBox = new VBox(15);
@@ -803,7 +1115,7 @@ public class ClienteGUI extends Application implements MessageListener {
         btnOk.getStyleClass().add("btn-eden");
 
         Button btnCancel = new Button("Cancelar");
-        btnCancel.setStyle("-fx-background-color: #c4a05a; -fx-text-fill: #3c3010; -fx-background-radius: 20px; -fx-padding: 8px 20px; -fx-font-size: 13px; -fx-cursor: hand;");
+        btnCancel.setStyle("-fx-background-color: linear-gradient(to bottom, #d4b06a, #c4a05a); -fx-text-fill: #3c3010; -fx-background-radius: 20px; -fx-border-color: #a88940; -fx-border-radius: 20px; -fx-border-width: 1px; -fx-padding: 8px 20px; -fx-font-size: 13px; -fx-font-weight: bold; -fx-cursor: hand;");
 
         buttons.getChildren().addAll(btnOk, btnCancel);
         box.getChildren().addAll(lblTitle, lblPrompt, txtInput, buttons);
@@ -875,7 +1187,7 @@ public class ClienteGUI extends Application implements MessageListener {
         btnOk.getStyleClass().add("btn-eden");
 
         Button btnCancel = new Button("Cancelar");
-        btnCancel.setStyle("-fx-background-color: #c4a05a; -fx-text-fill: #3c3010; -fx-background-radius: 20px; -fx-padding: 8px 20px; -fx-font-size: 13px; -fx-cursor: hand;");
+        btnCancel.setStyle("-fx-background-color: linear-gradient(to bottom, #d4b06a, #c4a05a); -fx-text-fill: #3c3010; -fx-background-radius: 20px; -fx-border-color: #a88940; -fx-border-radius: 20px; -fx-border-width: 1px; -fx-padding: 8px 20px; -fx-font-size: 13px; -fx-font-weight: bold; -fx-cursor: hand;");
 
         buttons.getChildren().addAll(btnOk, btnCancel);
         box.getChildren().addAll(lblTitle, lblPrompt, listOptions, buttons);
@@ -915,28 +1227,43 @@ public class ClienteGUI extends Application implements MessageListener {
     //  CALLBACKS DO LISTENER (Thread UDP -> GUI)
     // =========================================================================
     @Override
-    public void onMessageReceived(InfoUser remetente, String mensagem, boolean isPrivate) {
+    public void onMessageReceived(String destino, InfoUser remetente, String mensagem, boolean isPrivate) {
         Platform.runLater(() -> {
+            String chatId;
             if (isPrivate) {
-                String chatId = "[PVT] " + remetente.getNome();
-                addChatBubble(chatId, remetente.getNome() + ": " + mensagem, false, true);
-
-                // Se estiver na conversa privada com essa pessoa, nao precisa de alerta
-                // Adicionar ao list se nao estiver la
+                chatId = "[PVT] " + remetente.getNome();
                 if (!onlineUsersList.getItems().contains(remetente.getNome())) {
                     onlineUsersList.getItems().add(remetente.getNome());
                 }
             } else {
-                // Mensagem de grupo - extrair o grupo da APDU (usa o campo grupo)
-                // Como a msg vem do ServidorUDP que repassa a APDU inteira, 
-                // precisamos identificar de qual grupo veio
-                // Por enquanto, adicionamos ao chat do primeiro grupo disponivel
-                String chatId = null;
-                if (!groupList.getItems().isEmpty()) {
-                    chatId = groupList.getItems().get(0);
+                chatId = destino;
+                if (chatId != null && !chatId.trim().isEmpty()) {
+                    if (!groupList.getItems().contains(chatId)) {
+                        groupList.getItems().add(chatId);
+                    }
+                    // Adiciona o usuario a lista de conhecidos do grupo
+                    knownGroupMembers.putIfAbsent(chatId, new HashSet<>());
+                    knownGroupMembers.get(chatId).add(remetente.getNome());
                 }
-                if (chatId != null) {
-                    addChatBubble(chatId, remetente.getNome() + ": " + mensagem, false, false);
+            }
+            
+            if (chatId != null && !chatId.trim().isEmpty()) {
+                if (mensagem.equals("~JOINED~")) {
+                    addChatBubble(chatId, "SYSTEM", remetente.getNome() + " entrou no grupo.", false, false, true);
+                } else if (mensagem.equals("~LEFT~")) {
+                    addChatBubble(chatId, "SYSTEM", remetente.getNome() + " saiu do grupo.", false, false, true);
+                    if (knownGroupMembers.containsKey(chatId)) {
+                        knownGroupMembers.get(chatId).remove(remetente.getNome());
+                    }
+                } else {
+                    addChatBubble(chatId, remetente.getNome(), mensagem, false, isPrivate, false);
+                }
+                
+                // Unread messages indicator
+                if (!chatId.equals(currentChat)) {
+                    unreadCounts.put(chatId, unreadCounts.getOrDefault(chatId, 0) + 1);
+                    if (isPrivate) onlineUsersList.refresh();
+                    else groupList.refresh();
                 }
             }
         });

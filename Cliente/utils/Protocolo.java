@@ -5,26 +5,33 @@ package utils;
  * servidor.
  */
 public class Protocolo {
-    // define o comando das apdus
+    /** Comando JOIN: entrar em grupo */
     public static final String JOIN = "JOIN";
+    /** Comando LEAVE: sair de grupo */
     public static final String LEAVE = "LEAVE";
+    /** Comando SEND: enviar mensagem a grupo */
     public static final String SEND = "SEND";
+    /** Comando LIST: listar grupos */
     public static final String LIST = "LIST";
+    /** Comando REGISTER: registrar no servidor */
     public static final String REGISTER = "REGISTER";
+    /** Comando SHUTDOWN: servidor desligando */
     public static final String SHUTDOWN = "SHUTDOWN";
+    /** Comando SENDPVT: mensagem privada */
     public static final String SENDPVT = "SENDPVT";
+    /** Comando LISTUSERS: listar usuarios */
     public static final String LISTUSERS = "LISTUSERS";
 
-    // porta padrao do servidor
+    /** Porta padrao do servidor E.D.E.N */
     public static final int PORTA_SERVIDOR = 5000;
 
-    // separador (flags)
+    /** Separador usado na string da APDU */
     public static final String SEPARADOR_CAMPO_APDU = "~/";
 
     // indices do comando desmembrado
     public static final int IDX_COMANDO = 0;
     public static final int IDX_GRUPO = 1;
     public static final int IDX_USUARIO = 2;
-    public static final int IDX_MENSAGEM = 3; // usado para os send
+    public static final int IDX_MENSAGEM = 3;
 
 }// fim Protocolo

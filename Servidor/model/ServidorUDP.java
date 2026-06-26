@@ -11,7 +11,7 @@ import utils.InfoUser;
 import utils.Protocolo;
 
 /**
- * Classe responsvel por administrar o servidor UDP, recebendo e enviando
+ * Classe responsavel por administrar o servidor UDP, recebendo e enviando
  * pacotes UDP.
  */
 public class ServidorUDP implements Runnable {
@@ -20,6 +20,12 @@ public class ServidorUDP implements Runnable {
 	private GerenciadorGrupos gerenciador;
 	private static final int BUFFER = 4096; // valor em bytes para evitar o truncamento de mensagens com pacote UDP
 
+	/**
+	 * Construtor do ServidorUDP.
+	 * 
+	 * @param porta A porta UDP a ser escutada
+	 * @param gerenciador O gerenciador de grupos e usuarios
+	 */
 	public ServidorUDP(int porta, GerenciadorGrupos gerenciador) {
 		this.porta = porta;
 		this.gerenciador = gerenciador;
@@ -42,15 +48,16 @@ public class ServidorUDP implements Runnable {
 			}
 
 		} catch (Exception e) {
-			System.err.println("[SERVIDOR:UDP] [ERROR] " + e.getMessage());
+			System.err.println("[SERVIDOR:UDP] [FATAL ERROR] Erro critico no socket UDP: " + e.getMessage());
+			e.printStackTrace();
 		}
 	}
 
 	/**
-	 * Processa o APDU recebido pelo servidor.
+	 * Processa a APDU recebida pelo servidor via UDP.
 	 * 
-	 * @param conexaoUDP Socket UDP para enviar respostas.
-	 * @param apdu       APDU recebido.
+	 * @param conexaoUDP Socket UDP para enviar respostas
+	 * @param apdu APDU recebida
 	 */
 	private void processarAPDU(DatagramSocket conexaoUDP, String apdu) {
 
@@ -85,7 +92,8 @@ public class ServidorUDP implements Runnable {
 						System.out.println("[SERVIDOR:UDP] [INFO] Encaminhando APDU SEND para '" + membroDestinatario.getNome() + "'");
 
 					} catch (Exception e) {
-						System.err.println("[SERVIDOR:UDP] [ERROR] Falha ao enviar para '" + membroDestinatario.getNome() + "'");
+						System.err.println("[SERVIDOR:UDP] [ERROR] Falha ao enviar para '" + membroDestinatario.getNome() + "' - " + e.getMessage());
+						// Como e um loop de envio, apenas logamos, nao paramos o envio para os outros membros
 					}
 				}
 

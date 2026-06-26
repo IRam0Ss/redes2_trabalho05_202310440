@@ -6,12 +6,13 @@ import utils.Protocolo;
 
 /**
  * Classe responsavel por iniciar o servidor, gerenciando as threads do
- * protocolo TCP e UDP
+ * protocolo TCP e UDP.
  */
 public class Servidor {
 
 	/**
-	 * Inicializa as threads TCP e UDP do servidor
+	 * Inicializa as threads TCP, UDP e Discovery do servidor.
+	 * Tambem adiciona um hook para fechar as conexoes ao encerrar.
 	 */
 	public void iniciar() {
 		GerenciadorGrupos gerenciador = new GerenciadorGrupos();

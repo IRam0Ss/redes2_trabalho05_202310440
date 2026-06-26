@@ -28,10 +28,9 @@ public class GerenciadorGrupos {
 	 * Adiciona um usuario a um grupo. Se o grupo nao existir, ele e criado
 	 * automaticamente.
 	 * 
-	 * @param nomeGrupo Nome do grupo desejado.
-	 * @param usuario   Objeto InfoUser contendo os dados do usuario.
-	 * @return true se o usuario foi adicionado com sucesso, false se ele ja estava
-	 *         no grupo.
+	 * @param nomeGrupo Nome do grupo desejado
+	 * @param usuario   Objeto InfoUser contendo os dados do usuario
+	 * @return true se o usuario foi adicionado com sucesso, false se ele ja estava no grupo
 	 */
 	public synchronized boolean join(String nomeGrupo, InfoUser usuario) {
 
@@ -52,15 +51,12 @@ public class GerenciadorGrupos {
 	} // end join
 
 	/**
-	 * Remove um usuario de um grupo. Se o grupo ficar vazio apos a remocao, ele e
-	 * deletado
+	 * Remove um usuario de um grupo. Se o grupo ficar vazio apos a remocao, ele e deletado
 	 * para evitar acumulo de grupos fantasmas na memoria.
 	 * 
-	 * @param nomeGrupo Nome do grupo.
-	 * @param usuario   Objeto InfoUser contendo os dados do usuario (Apenas IP e
-	 *                  Porta sao necessarios para a remocao).
-	 * @return true se removido com sucesso, false se o grupo nao existir ou usuario
-	 *         nao pertencer a ele.
+	 * @param nomeGrupo Nome do grupo
+	 * @param usuario   Objeto InfoUser contendo os dados do usuario
+	 * @return true se removido com sucesso, false se o grupo nao existir ou usuario nao pertencer a ele
 	 */
 	public synchronized boolean leave(String nomeGrupo, InfoUser usuario) {
 		if (!gruposExistentes.containsKey(nomeGrupo)) {
@@ -85,13 +81,11 @@ public class GerenciadorGrupos {
 
 	/**
 	 * Retorna a lista de membros de um grupo, excluindo o remetente.
-	 * E utilizado na operacao SEND para encaminhar a mensagem para todos os membros
-	 * corretos.
+	 * E utilizado na operacao SEND para encaminhar a mensagem para todos os membros corretos.
 	 * 
-	 * @param nomeGrupo        Nome do grupo.
-	 * @param usuarioRemetente Usuario que esta enviando a mensagem.
-	 * @return Lista de usuarios destinatarios. Retorna uma lista vazia caso o grupo
-	 *         nao exista ou o remetente nao pertenca a ele.
+	 * @param nomeGrupo        Nome do grupo
+	 * @param usuarioRemetente Usuario que esta enviando a mensagem
+	 * @return Lista de usuarios destinatarios
 	 */
 	public synchronized List<InfoUser> getMembrosEnvio(String nomeGrupo, InfoUser usuarioRemetente) {
 
@@ -113,7 +107,7 @@ public class GerenciadorGrupos {
 	} // fim do getMembrosEnvio
 
 	/**
-	 * Retorna a lista de nomes dos grupos atualmente ativos
+	 * Retorna a lista de nomes dos grupos atualmente ativos.
 	 * 
 	 * @return Lista de strings contendo os nomes dos grupos
 	 */
@@ -133,25 +127,51 @@ public class GerenciadorGrupos {
 		System.out.println("\n");
 	} // fim imprimirEstado
 
+	/**
+	 * Registra um usuario globalmente no servidor, caso o nome nao esteja em uso.
+	 * 
+	 * @param usuario Usuario a ser registrado
+	 * @return true se registrado com sucesso, false se o nome ja estiver em uso
+	 */
 	public synchronized boolean registrarUsuario(InfoUser usuario) {
+		System.out.println("[GERENCIADOR] [DEBUG] Tentando registrar usuario: " + usuario.toString());
+		System.out.println("[GERENCIADOR] [DEBUG] Usuarios ativos antes do registro: " + todosUsuariosAtivos.size());
 		for (InfoUser u : todosUsuariosAtivos) {
+			System.out.println("[GERENCIADOR] [DEBUG]   -> " + u.toString());
 			if (u.getNome().equalsIgnoreCase(usuario.getNome())) {
 				System.out.println("[GERENCIADOR] [WARNING] Nome '" + usuario.getNome() + "' ja esta em uso.");
 				return false;
 			}
 		}
 		todosUsuariosAtivos.add(usuario);
+		System.out.println("[GERENCIADOR] [INFO] Usuario '" + usuario.getNome() + "' registrado com sucesso. Total ativos: " + todosUsuariosAtivos.size());
 		return true;
 	}
 
+	/**
+	 * Remove um usuario da lista global do servidor.
+	 * 
+	 * @param usuario Usuario a ser removido
+	 */
 	public synchronized void removerUsuario(InfoUser usuario) {
 		todosUsuariosAtivos.remove(usuario);
 	}
 
+	/**
+	 * Retorna todos os usuarios conectados atualmente ao servidor.
+	 * 
+	 * @return Conjunto de InfoUser com todos os usuarios ativos
+	 */
 	public synchronized java.util.Set<InfoUser> getTodosUsuariosAtivos() {
 		return new java.util.HashSet<>(todosUsuariosAtivos);
 	}
 
+	/**
+	 * Busca um usuario conectado pelo nome.
+	 * 
+	 * @param nome Nome do usuario a buscar
+	 * @return InfoUser correspondente, ou null se nao encontrado
+	 */
 	public synchronized InfoUser buscarUsuarioPorNome(String nome) {
 		for (InfoUser u : todosUsuariosAtivos) {
 			if (u.getNome().equalsIgnoreCase(nome)) {

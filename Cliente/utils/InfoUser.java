@@ -6,8 +6,8 @@ import java.net.URLDecoder;
 
 /**
  * Classe responsavel por armazenar as informacoes dos usuarios conectados
- * A identificacao unica de um usuario eh dada pela combinacao de seu IP e
- * Porta.
+ * A identificacao unica de um usuario e dada pela combinacao de seu IP e
+ * nome.
  */
 public class InfoUser {
 
@@ -38,7 +38,7 @@ public class InfoUser {
   }
 
   /**
-   * Obtém o endereco IP do usuário.
+   * Obtem o endereco IP do usuario.
    * 
    * @return O endereco IP.
    */
@@ -107,11 +107,11 @@ public class InfoUser {
   }
 
   /**
-   * Compara se dois usuarios sao iguais baseando-se em seus IPs e Portas.
-   * Esta eh a chave de unicidade dentro da estrutura de dados.
+   * Compara se dois usuarios sao iguais baseando-se em seus IPs e Nomes.
+   * Esta e a chave de unicidade dentro da estrutura de dados.
    * 
    * @param obj Objeto a ser comparado.
-   * @return true se tiverem o mesmo IP e Porta, false caso contrario.
+   * @return true se tiverem o mesmo IP e Nome, false caso contrario.
    */
   @Override
   public boolean equals(Object obj) {

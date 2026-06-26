@@ -7,11 +7,11 @@ public class APDU {
 
 	// montagem da apdu
 	/**
-	 * Monta a APDU de join seguindo o protocolo
+	 * Monta a APDU de join seguindo o protocolo.
 	 * 
-	 * @param nomeGrupo
-	 * @param usuario
-	 * @return
+	 * @param nomeGrupo Nome do grupo
+	 * @param usuario Objeto InfoUser
+	 * @return APDU formatada
 	 */
 	public static String montarJoin(String nomeGrupo, InfoUser usuario) {
 		String grupoSeguro = nomeGrupo;
@@ -26,11 +26,11 @@ public class APDU {
 	}
 
 	/**
-	 * Monta a APDU de leave seguindo o protocolo
+	 * Monta a APDU de leave seguindo o protocolo.
 	 * 
-	 * @param nomeGrupo
-	 * @param usuario
-	 * @return
+	 * @param nomeGrupo Nome do grupo
+	 * @param usuario Objeto InfoUser
+	 * @return APDU formatada
 	 */
 	public static String montarLeave(String nomeGrupo, InfoUser usuario) {
 		String grupoSeguro = nomeGrupo;
@@ -44,12 +44,12 @@ public class APDU {
 	}
 
 	/**
-	 * Monta a APDU de send seguindo o protocolo
+	 * Monta a APDU de send seguindo o protocolo.
 	 * 
-	 * @param nomeGrupo
-	 * @param usuario
-	 * @param mensagem
-	 * @return
+	 * @param nomeGrupo Nome do grupo
+	 * @param usuario Objeto InfoUser
+	 * @param mensagem Conteudo da mensagem
+	 * @return APDU formatada
 	 */
 	public static String montarSend(String nomeGrupo, InfoUser usuario, String mensagem) {
 		String grupoSeguro = nomeGrupo;
@@ -65,12 +65,12 @@ public class APDU {
 	}
 
 	/**
-	 * Monta a APDU de sendpvt seguindo o protocolo
+	 * Monta a APDU de sendpvt seguindo o protocolo.
 	 * 
-	 * @param nomeDestinatario
-	 * @param usuario
-	 * @param mensagem
-	 * @return
+	 * @param nomeDestinatario Nome do usuario destino
+	 * @param usuario Objeto InfoUser remetente
+	 * @param mensagem Conteudo da mensagem
+	 * @return APDU formatada
 	 */
 	public static String montarSendPvt(String nomeDestinatario, InfoUser usuario, String mensagem) {
 		String destSeguro = nomeDestinatario;
@@ -88,10 +88,10 @@ public class APDU {
 	// desempacotamento da apdu
 
 	/**
-	 * Retorna o comando da APDU
+	 * Retorna o comando da APDU.
 	 * 
-	 * @param apdu
-	 * @return
+	 * @param apdu APDU completa
+	 * @return Comando extraido
 	 */
 	public static String extrairComando(String apdu) {
 		String comando = apdu.split(Protocolo.SEPARADOR_CAMPO_APDU)[Protocolo.IDX_COMANDO];
@@ -99,10 +99,10 @@ public class APDU {
 	}
 
 	/**
-	 * Retorna o nome do grupo da APDU
+	 * Retorna o nome do grupo da APDU.
 	 * 
-	 * @param apdu
-	 * @return
+	 * @param apdu APDU completa
+	 * @return Nome do grupo extraido
 	 */
 	public static String extrairGrupo(String apdu) {
 		String grupo = apdu.split(Protocolo.SEPARADOR_CAMPO_APDU)[Protocolo.IDX_GRUPO];
@@ -114,10 +114,10 @@ public class APDU {
 	}
 
 	/**
-	 * Retorna o usuário da APDU
+	 * Retorna o usuario da APDU.
 	 * 
-	 * @param apdu
-	 * @return
+	 * @param apdu APDU completa
+	 * @return Objeto InfoUser extraido
 	 */
 	public static InfoUser extrairUsuario(String apdu) {
 		String usuario = apdu.split(Protocolo.SEPARADOR_CAMPO_APDU)[Protocolo.IDX_USUARIO];
@@ -125,10 +125,10 @@ public class APDU {
 	}
 
 	/**
-	 * Retorna a mensagem da APDU
+	 * Retorna a mensagem da APDU.
 	 * 
-	 * @param apdu
-	 * @return
+	 * @param apdu APDU completa
+	 * @return Mensagem extraida
 	 */
 	public static String extrairMensagem(String apdu) {
 		String mensagem = apdu.split(Protocolo.SEPARADOR_CAMPO_APDU, 4)[Protocolo.IDX_MENSAGEM];

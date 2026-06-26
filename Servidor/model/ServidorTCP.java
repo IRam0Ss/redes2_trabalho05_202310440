@@ -8,15 +8,21 @@ import controller.AtendimentoCliente;
 
 /**
  * Classe responsavel por gerar a conexao TCP entre cliente e servidor.
- * Ela eh responsavel por criar o socket e ficar escutando por novas conexoes e
+ * Ela e responsavel por criar o socket e ficar escutando por novas conexoes e
  * gerar uma thread de atendimento unico para o cliente que se conectar,
- * permitindo multiplos atendimentos
+ * permitindo multiplos atendimentos.
  */
 public class ServidorTCP implements Runnable {
 
 	private int porta;
 	private GerenciadorGrupos gerenciador;
 
+	/**
+	 * Construtor do ServidorTCP.
+	 * 
+	 * @param porta A porta TCP a ser escutada
+	 * @param gerenciador O gerenciador de grupos e usuarios
+	 */
 	public ServidorTCP(int porta, GerenciadorGrupos gerenciador) {
 		this.porta = porta;
 		this.gerenciador = gerenciador;

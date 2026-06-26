@@ -4,7 +4,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
 /**
- * Thread responsavel por funcionar como um "farol" na rede local.
+ * Thread responsavel por funcionar como um farol na rede local.
  * Ela escuta broadcasts na porta 5001 e responde aos clientes informando
  * que o servidor E.D.E.N. esta rodando nesta maquina.
  */

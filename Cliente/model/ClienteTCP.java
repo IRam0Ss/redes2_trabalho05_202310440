@@ -22,12 +22,12 @@ public class ClienteTCP {
 	private BufferedReader leitorEntrada;
 
 	/**
-	 * Construtor que inicializa a conexao TCP com o servidor
+	 * Construtor que inicializa a conexao TCP com o servidor.
 	 * 
-	 * @param ipServidor
-	 * @param portaServidor
-	 * @throws UnknownHostException
-	 * @throws IOException
+	 * @param ipServidor IP do servidor
+	 * @param portaServidor Porta do servidor
+	 * @throws UnknownHostException Caso o host nao seja encontrado
+	 * @throws IOException Erro de entrada/saida na conexao
 	 */
 	public ClienteTCP(String ipServidor, int portaServidor) throws UnknownHostException, IOException {
 		this.conexaoTCP = new Socket(ipServidor, portaServidor);
@@ -37,10 +37,11 @@ public class ClienteTCP {
 	}
 
 	/**
-	 * Envia mensagem JOIN ao servidor para ingressar em um grupo
+	 * Envia mensagem JOIN ao servidor para ingressar em um grupo.
 	 * 
 	 * @param nomeGrupo Nome do grupo
 	 * @param usuario   Informacoes do usuario
+	 * @return Resposta do servidor
 	 */
 	public synchronized String join(String nomeGrupo, InfoUser usuario) {
 		String apdu = APDU.montarJoin(nomeGrupo, usuario);
@@ -54,10 +55,11 @@ public class ClienteTCP {
 	}
 
 	/**
-	 * Envia mensagem LEAVE ao servidor para sair de um grupo
+	 * Envia mensagem LEAVE ao servidor para sair de um grupo.
 	 * 
 	 * @param nomeGrupo Nome do grupo
 	 * @param usuario   Informacoes do usuario
+	 * @return Resposta do servidor
 	 */
 	public synchronized String leave(String nomeGrupo, InfoUser usuario) {
 		String apdu = APDU.montarLeave(nomeGrupo, usuario);
@@ -90,6 +92,7 @@ public class ClienteTCP {
 	 * e validar o nome de usuario.
 	 * 
 	 * @param usuario Informacoes do usuario (com a porta UDP que ele escuta)
+	 * @return Resposta do servidor
 	 */
 	public synchronized String register(InfoUser usuario) {
 		String apdu = Protocolo.REGISTER + Protocolo.SEPARADOR_CAMPO_APDU + "GLOBAL" + Protocolo.SEPARADOR_CAMPO_APDU + usuario.empacotar();
@@ -115,6 +118,9 @@ public class ClienteTCP {
 		}
 	}
 
+	/**
+	 * Encerra a conexao TCP com o servidor.
+	 */
 	public void fecharConexao() {
 		try {
 			escritorSaida.close();
@@ -128,6 +134,8 @@ public class ClienteTCP {
 	/**
 	 * Obtem o IP local vinculado a esta conexao TCP.
 	 * Isso evita problemas de Firewall e adaptadores virtuais (VirtualBox/Docker).
+	 * 
+	 * @return IP local da conexao
 	 */
 	public String getIpLocal() {
 		return conexaoTCP.getLocalAddress().getHostAddress();
