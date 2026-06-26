@@ -17,6 +17,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.animation.FadeTransition;
+import javafx.animation.ScaleTransition;
 import javafx.animation.TranslateTransition;
 import javafx.util.Duration;
 
@@ -57,6 +58,7 @@ public class ClienteGUI extends Application implements MessageListener {
 	private ListView<String> groupList;
 	private ListView<String> onlineUsersList;
 	private HBox chatHeaderBox; // to hold details button
+	private VBox emptyStateBox;
 
 	// New features state
 	private Map<String, Integer> unreadCounts = new HashMap<>();
@@ -124,7 +126,23 @@ public class ClienteGUI extends Application implements MessageListener {
 	}
 
 	// =========================================================================
-	// TELA 1 - SPLASH
+	// HELPER: ANIMATION
+	// =========================================================================
+	private void addHoverScale(Button btn) {
+		ScaleTransition stEnter = new ScaleTransition(Duration.millis(150), btn);
+		stEnter.setToX(1.05);
+		stEnter.setToY(1.05);
+
+		ScaleTransition stExit = new ScaleTransition(Duration.millis(150), btn);
+		stExit.setToX(1.0);
+		stExit.setToY(1.0);
+
+		btn.setOnMouseEntered(e -> stEnter.playFromStart());
+		btn.setOnMouseExited(e -> stExit.playFromStart());
+	}
+
+	// =========================================================================
+	// TELA 1 - SPLASH (Login & Server Connect)
 	// =========================================================================
 	private Node createSplash() {
 		VBox splash = new VBox(25);
@@ -147,10 +165,12 @@ public class ClienteGUI extends Application implements MessageListener {
 		Button btnEntrar = new Button("Entrar");
 		btnEntrar.getStyleClass().add("btn-eden");
 		btnEntrar.setOnAction(e -> switchView(createLogin()));
+		addHoverScale(btnEntrar);
 
 		Button btnSobre = new Button("Sobre");
 		btnSobre.getStyleClass().add("btn-eden");
 		btnSobre.setOnAction(e -> switchView(createSobre()));
+		addHoverScale(btnSobre);
 
 		splash.getChildren().addAll(title1, titleDa, title2, btnEntrar, btnSobre);
 		return splash;
@@ -421,16 +441,19 @@ public class ClienteGUI extends Application implements MessageListener {
 		btnJoin.getStyleClass().add("btn-eden");
 		btnJoin.setStyle("-fx-font-size: 11px; -fx-padding: 5px 12px;");
 		btnJoin.setOnAction(e -> onJoinGroup());
+		addHoverScale(btnJoin);
 
 		Button btnLeave = new Button("- Sair");
 		btnLeave.setStyle(
 				"-fx-background-color: linear-gradient(to bottom, #d4b06a, #c4a05a); -fx-text-fill: #3c3010; -fx-font-size: 11px; -fx-padding: 5px 12px; -fx-background-radius: 20px; -fx-border-color: #a88940; -fx-border-radius: 20px; -fx-border-width: 1px; -fx-cursor: hand; -fx-font-weight: bold;");
 		btnLeave.setOnAction(e -> onLeaveGroup());
+		addHoverScale(btnLeave);
 
 		Button btnListGroups = new Button("Listar Grupos");
 		btnListGroups.getStyleClass().add("btn-eden");
 		btnListGroups.setStyle("-fx-font-size: 11px; -fx-padding: 5px 12px;");
 		btnListGroups.setOnAction(e -> onListGroups());
+		addHoverScale(btnListGroups);
 
 		grpBtns.getChildren().addAll(btnJoin, btnLeave);
 
@@ -464,6 +487,7 @@ public class ClienteGUI extends Application implements MessageListener {
 		btnRefresh.getStyleClass().add("btn-eden");
 		btnRefresh.setStyle("-fx-font-size: 11px; -fx-padding: 5px 12px;");
 		btnRefresh.setOnAction(e -> refreshOnlineUsers());
+		addHoverScale(btnRefresh);
 
 		// -- Status de Conexao & Botao Voltar --
 		Separator sep2 = new Separator();
@@ -489,6 +513,7 @@ public class ClienteGUI extends Application implements MessageListener {
 		btnDesconectar.setStyle(
 				"-fx-background-color: linear-gradient(to bottom, #d4b06a, #c4a05a); -fx-text-fill: #3c3010; -fx-font-size: 11px; -fx-padding: 6px 12px; -fx-background-radius: 20px; -fx-border-color: #a88940; -fx-border-radius: 20px; -fx-border-width: 1px; -fx-cursor: hand; -fx-font-weight: bold;");
 		btnDesconectar.setMaxWidth(Double.MAX_VALUE);
+		addHoverScale(btnDesconectar);
 		btnDesconectar.setOnAction(e -> {
 			if (tcp != null)
 				tcp.fecharConexao();
@@ -537,9 +562,21 @@ public class ClienteGUI extends Application implements MessageListener {
 		chatScroll.setFitToWidth(true);
 		chatScroll.getStyleClass().add("chat-scroll-pane");
 		chatScroll.setStyle("-fx-background-color: transparent; -fx-background: transparent;");
+		chatScroll.setVisible(false); // Escondido inicialmente
 
-		// Logo centralizada EXCLUSIVAMENTE na area de chat
+		// Estado Vazio (Empty State) - Apenas o texto
+		emptyStateBox = new VBox(15);
+		emptyStateBox.setAlignment(Pos.CENTER);
+		emptyStateBox.setMouseTransparent(true);
+		
+		Label lblEmpty = new Label("Selecione um canal seguro para iniciar a transmissao...");
+		lblEmpty.setFont(Font.font("Consolas", 14));
+		lblEmpty.setTextFill(Color.web("#8a9b3a"));
+		emptyStateBox.getChildren().add(lblEmpty);
+
 		StackPane chatContainer = new StackPane();
+		
+		// Marca d'água permanente no fundo do chat
 		try {
 			ImageView chatWatermark = new ImageView(new Image(getClass().getResourceAsStream("/view/edenIcon.png")));
 			chatWatermark.setOpacity(0.18);
@@ -549,9 +586,10 @@ public class ClienteGUI extends Application implements MessageListener {
 			chatContainer.getChildren().add(chatWatermark);
 			StackPane.setAlignment(chatWatermark, Pos.CENTER);
 		} catch (Exception ex) {
-			System.out.println("[GUI] Warning: edenIcon.png nao encontrado.");
+			System.out.println("[GUI] Warning: edenIcon.png nao encontrado para o chatContainer.");
 		}
-		chatContainer.getChildren().add(chatScroll);
+
+		chatContainer.getChildren().addAll(emptyStateBox, chatScroll);
 		VBox.setVgrow(chatContainer, Priority.ALWAYS);
 
 		// Input bar
@@ -569,6 +607,7 @@ public class ClienteGUI extends Application implements MessageListener {
 		Button btnSend = new Button("Enviar");
 		btnSend.setStyle(
 				"-fx-background-color: linear-gradient(to bottom, #4f5a2d, #3f4a23); -fx-text-fill: #d8e87d; -fx-background-radius: 20px; -fx-border-color: #5b6623; -fx-border-radius: 20px; -fx-border-width: 1px; -fx-padding: 10px 20px; -fx-font-size: 13px; -fx-font-weight: bold; -fx-cursor: hand;");
+		addHoverScale(btnSend);
 
 		btnSend.setOnAction(e -> onSendMessage(txtMsg));
 		txtMsg.setOnAction(e -> onSendMessage(txtMsg));
@@ -798,6 +837,10 @@ public class ClienteGUI extends Application implements MessageListener {
 
 	private void switchChatTo(String chatId) {
 		currentChat = chatId;
+		
+		// Hide empty state and show scroll
+		if (emptyStateBox != null) emptyStateBox.setVisible(false);
+		if (chatScroll != null) chatScroll.setVisible(true);
 
 		// Clear unread counts for this chat
 		if (unreadCounts.containsKey(chatId)) {
