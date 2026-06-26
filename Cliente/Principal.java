@@ -1,3 +1,4 @@
+
 /**
  * Classe principal do Cliente.
  * Responsavel por inicializar a aplicacao grafica JavaFX.

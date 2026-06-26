@@ -202,7 +202,11 @@ public class ClienteGUI extends Application implements MessageListener {
 		btnVoltar.setOnAction(e -> switchView(createSplash()));
 
 		sobre.getChildren().addAll(title, contentBox, techFooter, btnVoltar);
-		return sobre;
+		
+		ScrollPane scroll = new ScrollPane(sobre);
+		scroll.setFitToWidth(true);
+		scroll.setStyle("-fx-background-color: transparent; -fx-background: transparent;");
+		return scroll;
 	}
 
 	// =========================================================================
@@ -398,7 +402,8 @@ public class ClienteGUI extends Application implements MessageListener {
 
 		groupList = new ListView<>();
 		groupList.setStyle("-fx-background-color: transparent; -fx-control-inner-background: transparent;");
-		groupList.setPrefHeight(200);
+		groupList.setPrefHeight(300);
+		VBox.setVgrow(groupList, Priority.ALWAYS);
 		groupList.setCellFactory(lv -> createStyledCell());
 
 		groupList.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
@@ -445,6 +450,7 @@ public class ClienteGUI extends Application implements MessageListener {
 
 		onlineUsersList = new ListView<>();
 		onlineUsersList.setStyle("-fx-background-color: transparent; -fx-control-inner-background: transparent;");
+		onlineUsersList.setPrefHeight(150);
 		onlineUsersList.setCellFactory(lv -> createStyledCell());
 
 		onlineUsersList.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
@@ -557,7 +563,7 @@ public class ClienteGUI extends Application implements MessageListener {
 		TextField txtMsg = new TextField();
 		txtMsg.setPromptText("Digite sua mensagem");
 		txtMsg.setStyle(
-				"-fx-background-color: rgba(255,255,255,0.35); -fx-background-radius: 20px; -fx-padding: 10px 18px; -fx-font-size: 14px; -fx-text-fill: #1a1e0b;");
+				"-fx-background-color: rgba(255,255,255,0.85); -fx-background-radius: 20px; -fx-padding: 10px 18px; -fx-font-size: 14px; -fx-text-fill: #000000; -fx-prompt-text-fill: #555555;");
 		HBox.setHgrow(txtMsg, Priority.ALWAYS);
 
 		Button btnSend = new Button("Enviar");
@@ -675,6 +681,7 @@ public class ClienteGUI extends Application implements MessageListener {
 
 		try {
 			udp.send(selected, eu, "~LEFT~");
+			Thread.sleep(150); // Aguarda o UDP chegar ao servidor antes de fechar via TCP
 		} catch (Exception ex) {
 		}
 
