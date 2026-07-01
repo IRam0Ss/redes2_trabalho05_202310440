@@ -21,4 +21,9 @@ public interface MessageListener {
      * Evento acionado quando o servidor desliga ou a conexao cai.
      */
     void onShutdown();
+
+    /**
+     * Evento acionado quando a lista de usuarios online no servidor muda.
+     */
+    void onUpdateUsers();
 }

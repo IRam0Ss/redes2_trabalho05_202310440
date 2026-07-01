@@ -31,8 +31,8 @@ public class ClienteTCP {
 	 */
 	public ClienteTCP(String ipServidor, int portaServidor) throws UnknownHostException, IOException {
 		this.conexaoTCP = new Socket(ipServidor, portaServidor);
-		this.escritorSaida = new PrintWriter(conexaoTCP.getOutputStream(), true);
-		this.leitorEntrada = new BufferedReader(new InputStreamReader(conexaoTCP.getInputStream()));
+		this.escritorSaida = new PrintWriter(new java.io.OutputStreamWriter(conexaoTCP.getOutputStream(), java.nio.charset.StandardCharsets.UTF_8), true);
+		this.leitorEntrada = new BufferedReader(new InputStreamReader(conexaoTCP.getInputStream(), java.nio.charset.StandardCharsets.UTF_8));
 		System.out.println("[CLIENTE:TCP] [INFO] Conectado ao servidor " + ipServidor + ":" + portaServidor);
 	}
 
@@ -111,6 +111,26 @@ public class ClienteTCP {
 	public synchronized String listUsers() {
 		escritorSaida.println(Protocolo.LISTUSERS);
 		System.out.println("[CLIENTE:TCP] [INFO] LISTUSERS enviado ao servidor");
+		try {
+			return leitorEntrada.readLine();
+		} catch (IOException e) {
+			return "ERRO~/Falha de conexao com o servidor";
+		}
+	}
+
+	/**
+	 * Solicita a lista de membros de um grupo
+	 * @param nomeGrupo Nome do grupo
+	 * @return Resposta do servidor com os nomes separados por virgula
+	 */
+	public synchronized String listMembers(String nomeGrupo) {
+		String safeGrupo = nomeGrupo;
+		try {
+			safeGrupo = java.net.URLEncoder.encode(nomeGrupo, "UTF-8");
+		} catch (Exception e) {}
+		String apdu = Protocolo.LISTMEMBERS + Protocolo.SEPARADOR_CAMPO_APDU + safeGrupo + Protocolo.SEPARADOR_CAMPO_APDU + "dummy";
+		escritorSaida.println(apdu);
+		System.out.println("[CLIENTE:TCP] [INFO] LISTMEMBERS enviado ao servidor para grupo: " + nomeGrupo);
 		try {
 			return leitorEntrada.readLine();
 		} catch (IOException e) {

@@ -107,6 +107,19 @@ public class GerenciadorGrupos {
 	} // fim do getMembrosEnvio
 
 	/**
+	 * Retorna a lista de todos os membros de um grupo, sem excecao.
+	 * 
+	 * @param nomeGrupo Nome do grupo
+	 * @return Lista de usuarios pertencentes ao grupo
+	 */
+	public synchronized List<InfoUser> getTodosMembros(String nomeGrupo) {
+		if (!gruposExistentes.containsKey(nomeGrupo)) {
+			return new ArrayList<>();
+		}
+		return new ArrayList<>(gruposExistentes.get(nomeGrupo));
+	}
+
+	/**
 	 * Retorna a lista de nomes dos grupos atualmente ativos.
 	 * 
 	 * @return Lista de strings contendo os nomes dos grupos
@@ -179,6 +192,66 @@ public class GerenciadorGrupos {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Notifica todos os usuarios ativos via UDP que a lista de usuarios online mudou.
+	 */
+	public void notificarAtualizacaoUsuarios() {
+		new Thread(() -> {
+			try (java.net.DatagramSocket socketUDP = new java.net.DatagramSocket()) {
+				byte[] dados = utils.Protocolo.UPDATE_USERS.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+				List<InfoUser> ativos;
+				synchronized (this) {
+					ativos = new ArrayList<>(todosUsuariosAtivos);
+				}
+				for (InfoUser u : ativos) {
+					try {
+						java.net.InetAddress ipDest = java.net.InetAddress.getByName(u.getIp());
+						java.net.DatagramPacket pacote = new java.net.DatagramPacket(dados, dados.length, ipDest, u.getPorta());
+						socketUDP.send(pacote);
+					} catch (Exception e) {}
+				}
+				System.out.println("[GERENCIADOR] [INFO] Notificacao UPDATE_USERS disparada para " + ativos.size() + " clientes.");
+			} catch (Exception e) {
+				System.err.println("[GERENCIADOR] [ERROR] Falha ao notificar atualizacao: " + e.getMessage());
+			}
+		}).start();
+	}
+
+	/**
+	 * Notifica todos os membros de um grupo com uma mensagem do sistema.
+	 * Utilizado para avisar sobre ~JOINED~ e ~LEFT~.
+	 */
+	public void notificarMensagemSistema(String nomeGrupo, InfoUser remetenteVirtual, String mensagem) {
+		new Thread(() -> {
+			try (java.net.DatagramSocket socketUDP = new java.net.DatagramSocket()) {
+				String apduEnviada = utils.APDU.montarSend(nomeGrupo, remetenteVirtual, mensagem);
+				byte[] dados = apduEnviada.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+				
+				List<InfoUser> membros;
+				synchronized (this) {
+					if (!gruposExistentes.containsKey(nomeGrupo)) return;
+					membros = new ArrayList<>(gruposExistentes.get(nomeGrupo));
+				}
+				
+				// Nao removemos o remetenteVirtual pois queremos que ele mesmo veja a msg?
+				// Na verdade o Cliente que enviou ja mostra na tela localmente (addChatBubble).
+				// Entao removemos o remetente para ele nao receber de volta se ele ainda estiver na lista.
+				membros.remove(remetenteVirtual);
+
+				for (InfoUser u : membros) {
+					try {
+						java.net.InetAddress ipDest = java.net.InetAddress.getByName(u.getIp());
+						java.net.DatagramPacket pacote = new java.net.DatagramPacket(dados, dados.length, ipDest, u.getPorta());
+						socketUDP.send(pacote);
+					} catch (Exception e) {}
+				}
+				System.out.println("[GERENCIADOR] [INFO] Mensagem de sistema (" + mensagem + ") disparada para o grupo '" + nomeGrupo + "'.");
+			} catch (Exception e) {
+				System.err.println("[GERENCIADOR] [ERROR] Falha ao notificar mensagem de sistema: " + e.getMessage());
+			}
+		}).start();
 	}
 
 }// fim da class

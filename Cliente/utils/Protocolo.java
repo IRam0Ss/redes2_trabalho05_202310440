@@ -19,8 +19,12 @@ public class Protocolo {
     public static final String SHUTDOWN = "SHUTDOWN";
     /** Comando SENDPVT: mensagem privada */
     public static final String SENDPVT = "SENDPVT";
-    /** Comando LISTUSERS: listar usuarios */
+    /** Comando LISTUSERS: listar usuarios globais */
     public static final String LISTUSERS = "LISTUSERS";
+    /** Comando LISTMEMBERS: listar membros de um grupo especifico */
+    public static final String LISTMEMBERS = "LISTMEMBERS";
+    /** Comando UPDATE_USERS: notificacao UDP de que um usuario conectou ou desconectou */
+    public static final String UPDATE_USERS = "UPDATE_USERS";
 
     /** Porta padrao do servidor E.D.E.N */
     public static final int PORTA_SERVIDOR = 5000;

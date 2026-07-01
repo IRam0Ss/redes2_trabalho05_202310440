@@ -27,13 +27,13 @@ public class ServidorDiscovery implements Runnable {
                 DatagramPacket pacoteRecebido = new DatagramPacket(buffer, buffer.length);
                 socket.receive(pacoteRecebido);
 
-                String mensagem = new String(pacoteRecebido.getData(), 0, pacoteRecebido.getLength()).trim();
+                String mensagem = new String(pacoteRecebido.getData(), 0, pacoteRecebido.getLength(), java.nio.charset.StandardCharsets.UTF_8).trim();
 
                 if (mensagem.equals(DISCOVER_MESSAGE)) {
                     System.out.println("[DISCOVERY] Busca recebida de: " + pacoteRecebido.getAddress().getHostAddress());
                     
                     // Responde dizendo "Estou aqui"
-                    byte[] dadosResposta = RESPONSE_MESSAGE.getBytes();
+                    byte[] dadosResposta = RESPONSE_MESSAGE.getBytes(java.nio.charset.StandardCharsets.UTF_8);
                     DatagramPacket pacoteResposta = new DatagramPacket(
                             dadosResposta,
                             dadosResposta.length,

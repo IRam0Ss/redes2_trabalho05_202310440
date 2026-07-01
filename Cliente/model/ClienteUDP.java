@@ -70,7 +70,7 @@ public class ClienteUDP implements Runnable {
 	public void send(String nomeGrupo, InfoUser usuario, String mensagem) throws exceptions.ConexaoException {
 		// montar apdu
 		String apdu = APDU.montarSend(nomeGrupo, usuario, mensagem);
-		byte[] dadosEnviados = apdu.getBytes();
+		byte[] dadosEnviados = apdu.getBytes(java.nio.charset.StandardCharsets.UTF_8);
 
 		DatagramPacket pacoteEnvio = new DatagramPacket(dadosEnviados, dadosEnviados.length, IP_SERVIDOR, portaServidor);
 		try {
@@ -93,7 +93,7 @@ public class ClienteUDP implements Runnable {
 	 */
 	public void sendPvt(String nomeDestinatario, InfoUser usuario, String mensagem) throws exceptions.ConexaoException {
 		String apdu = APDU.montarSendPvt(nomeDestinatario, usuario, mensagem);
-		byte[] dadosEnviados = apdu.getBytes();
+		byte[] dadosEnviados = apdu.getBytes(java.nio.charset.StandardCharsets.UTF_8);
 
 		DatagramPacket pacoteEnvio = new DatagramPacket(dadosEnviados, dadosEnviados.length, IP_SERVIDOR, portaServidor);
 		try {
@@ -116,13 +116,19 @@ public class ClienteUDP implements Runnable {
 			DatagramPacket pacoteRecebido = new DatagramPacket(bufferRecepcao, bufferRecepcao.length);
 			try {
 				socketUDP.receive(pacoteRecebido);
-				String apdu = new String(pacoteRecebido.getData(), 0, pacoteRecebido.getLength());
+				String apdu = new String(pacoteRecebido.getData(), 0, pacoteRecebido.getLength(), java.nio.charset.StandardCharsets.UTF_8);
 				
 				String comando = APDU.extrairComando(apdu);
 				if (utils.Protocolo.SHUTDOWN.equals(comando)) {
 					System.out.println("\n[SISTEMA] O servidor foi encerrado. A aplicacao sera finalizada.");
 					if (listener != null) listener.onShutdown();
 					else System.exit(0);
+				}
+				
+				if (utils.Protocolo.UPDATE_USERS.equals(comando)) {
+					System.out.println("[CLIENTE:UDP] [INFO] Recebida notificacao de atualizacao de usuarios.");
+					if (listener != null) listener.onUpdateUsers();
+					continue;
 				}
 				
 				if (utils.Protocolo.SENDPVT.equals(comando)) {

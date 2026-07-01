@@ -29,6 +29,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.nio.charset.StandardCharsets;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.scene.shape.SVGPath;
 
 import model.ClienteTCP;
 import model.ClienteUDP;
@@ -59,6 +65,9 @@ public class ClienteGUI extends Application implements MessageListener {
 	private ListView<String> onlineUsersList;
 	private HBox chatHeaderBox; // to hold details button
 	private VBox emptyStateBox;
+
+	private ObservableList<String> masterGroupData = FXCollections.observableArrayList();
+	private ObservableList<String> masterUsersData = FXCollections.observableArrayList();
 
 	// New features state
 	private Map<String, Integer> unreadCounts = new HashMap<>();
@@ -193,7 +202,7 @@ public class ClienteGUI extends Application implements MessageListener {
 				"-fx-background-color: linear-gradient(to bottom right, rgba(229, 232, 215, 0.9), rgba(200, 210, 180, 0.8)); -fx-padding: 30px; -fx-background-radius: 15px; -fx-border-color: #8a9b3a; -fx-border-width: 2px; -fx-border-radius: 15px; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.25), 15, 0, 0, 8);");
 
 		Label text = new Label(
-				"Seja bem-vindo ao sistema de comunicacao interna do E.D.E.N.. Se voce esta acessando esta interface, sua transicao foi concluida: a partir de agora, voce faz parte do Jardim, e suas vidas nunca mais serao as mesmas. O E.D.E.N. e o presente, o passado e o proprio futuro; nos somos a raiz invisivel que sustenta o novo amanhecer, e hoje voce se torna um membro valioso desta fundacao. Deixamos para tras o que era velho, quebrado e sem proposito para trabalharmos juntos na verdadeira transformacao do mundo. Saiba que voce nao esta aqui por acaso; voce foi cirurgicamente escolhido, e o Conselho esta de olho em cada uma de suas acoes. Use este canal interno com absoluta disciplina para coordenar suas diretrizes entre os outros agentes do Jardim. Lembre-se diariamente da importancia do seu papel nesta engrenagem: nos somos o amanha construido hoje. Nos somos o futuro.");
+				"Seja bem-vindo ao sistema de comunica\u00E7\u00E3o interna do E.D.E.N.. Se voc\u00EA est\u00E1 acessando esta interface, sua transi\u00E7\u00E3o foi conclu\u00EDda: a partir de agora, voc\u00EA faz parte do Jardim, e suas vidas nunca mais ser\u00E3o as mesmas. O E.D.E.N. \u00E9 o presente, o passado e o pr\u00F3prio futuro; n\u00F3s somos a raiz invis\u00EDvel que sustenta o novo amanhecer, e hoje voc\u00EA se torna um membro valioso desta funda\u00E7\u00E3o. Deixamos para tr\u00E1s o que era velho, quebrado e sem prop\u00F3sito para trabalharmos juntos na verdadeira transforma\u00E7\u00E3o do mundo. Saiba que voc\u00EA n\u00E3o est\u00E1 aqui por acaso; voc\u00EA foi cirurgicamente escolhido, e o Conselho est\u00E1 de olho em cada uma de suas a\u00E7\u00F5es. Use este canal interno com absoluta disciplina para coordenar suas diretrizes entre os outros agentes do Jardim. Lembre-se diariamente da import\u00E2ncia do seu papel nesta engrenagem: n\u00F3s somos o amanh\u00E3 constru\u00EDdo hoje. N\u00F3s somos o futuro.");
 		text.setWrapText(true);
 		text.setTextAlignment(TextAlignment.JUSTIFY);
 		text.setFont(Font.font("Consolas", 14));
@@ -281,7 +290,7 @@ public class ClienteGUI extends Application implements MessageListener {
 					socket.setBroadcast(true);
 					socket.setSoTimeout(2000); // 2 segundos de timeout
 
-					byte[] dados = "DISCOVER_EDEN".getBytes();
+					byte[] dados = "DISCOVER_EDEN".getBytes(StandardCharsets.UTF_8);
 					java.net.DatagramPacket pacote = new java.net.DatagramPacket(
 							dados, dados.length,
 							java.net.InetAddress.getByName("255.255.255.255"), 5001);
@@ -291,7 +300,7 @@ public class ClienteGUI extends Application implements MessageListener {
 					java.net.DatagramPacket resposta = new java.net.DatagramPacket(buffer, buffer.length);
 					socket.receive(resposta);
 
-					String msg = new String(resposta.getData(), 0, resposta.getLength());
+					String msg = new String(resposta.getData(), 0, resposta.getLength(), StandardCharsets.UTF_8);
 					if (msg.trim().equals("EDEN_HERE")) {
 						String ipDescoberto = resposta.getAddress().getHostAddress();
 						Platform.runLater(() -> {
@@ -414,13 +423,50 @@ public class ClienteGUI extends Application implements MessageListener {
 		sidebar.setPadding(new Insets(12));
 		sidebar.setStyle("-fx-background-color: #b8c464; -fx-background-radius: 0;");
 
+		FilteredList<String> filteredGroups = new FilteredList<>(masterGroupData, p -> true);
+		FilteredList<String> filteredUsers = new FilteredList<>(masterUsersData, p -> true);
+
 		// -- Secao: Grupos --
+		HBox boxGruposHeader = new HBox(8);
+		boxGruposHeader.setAlignment(Pos.CENTER_LEFT);
+		
 		Label lblGrupos = new Label("GRUPOS");
 		lblGrupos.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
 		lblGrupos.setTextFill(Color.web("#3f4a23"));
 		lblGrupos.setPadding(new Insets(5, 0, 5, 5));
+		HBox.setHgrow(lblGrupos, Priority.ALWAYS);
+		lblGrupos.setMaxWidth(Double.MAX_VALUE);
 
-		groupList = new ListView<>();
+		SVGPath searchIconGroups = new SVGPath();
+		searchIconGroups.setContent("M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z");
+		searchIconGroups.setFill(Color.web("#8a9b3a"));
+		searchIconGroups.setStyle("-fx-cursor: hand;");
+		
+		boxGruposHeader.getChildren().addAll(lblGrupos, searchIconGroups);
+
+		TextField txtSearchGroups = new TextField();
+		txtSearchGroups.setPromptText("Buscar grupo...");
+		txtSearchGroups.setStyle("-fx-background-color: rgba(255, 255, 255, 0.85); -fx-background-radius: 20px; -fx-padding: 6px 15px; -fx-font-size: 13.5px; -fx-text-fill: #1a1e0b; -fx-prompt-text-fill: #555555;");
+		txtSearchGroups.setVisible(false);
+		txtSearchGroups.setManaged(false);
+
+		searchIconGroups.setOnMouseClicked(e -> {
+			boolean vis = txtSearchGroups.isVisible();
+			txtSearchGroups.setVisible(!vis);
+			txtSearchGroups.setManaged(!vis);
+			if (!vis) txtSearchGroups.requestFocus();
+			else txtSearchGroups.clear();
+		});
+
+		txtSearchGroups.textProperty().addListener((obs, oldVal, newVal) -> {
+			String lower = newVal.toLowerCase();
+			filteredGroups.setPredicate(item -> {
+				if (newVal == null || newVal.isEmpty()) return true;
+				return item.toLowerCase().contains(lower);
+			});
+		});
+
+		groupList = new ListView<>(filteredGroups);
 		groupList.setStyle("-fx-background-color: transparent; -fx-control-inner-background: transparent;");
 		groupList.setPrefHeight(300);
 		VBox.setVgrow(groupList, Priority.ALWAYS);
@@ -466,12 +512,46 @@ public class ClienteGUI extends Application implements MessageListener {
 		sep.setStyle("-fx-background-color: #8a9b3a;");
 
 		// -- Secao: Usuarios Online --
+		HBox boxUsersHeader = new HBox(8);
+		boxUsersHeader.setAlignment(Pos.CENTER_LEFT);
+		
 		Label lblUsers = new Label("USUARIOS ONLINE");
 		lblUsers.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
 		lblUsers.setTextFill(Color.web("#3f4a23"));
 		lblUsers.setPadding(new Insets(5, 0, 5, 5));
+		HBox.setHgrow(lblUsers, Priority.ALWAYS);
+		lblUsers.setMaxWidth(Double.MAX_VALUE);
 
-		onlineUsersList = new ListView<>();
+		SVGPath searchIconUsers = new SVGPath();
+		searchIconUsers.setContent("M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z");
+		searchIconUsers.setFill(Color.web("#8a9b3a"));
+		searchIconUsers.setStyle("-fx-cursor: hand;");
+		
+		boxUsersHeader.getChildren().addAll(lblUsers, searchIconUsers);
+
+		TextField txtSearchUsers = new TextField();
+		txtSearchUsers.setPromptText("Buscar usu\u00E1rio...");
+		txtSearchUsers.setStyle("-fx-background-color: rgba(255, 255, 255, 0.85); -fx-background-radius: 20px; -fx-padding: 6px 15px; -fx-font-size: 13.5px; -fx-text-fill: #1a1e0b; -fx-prompt-text-fill: #555555;");
+		txtSearchUsers.setVisible(false);
+		txtSearchUsers.setManaged(false);
+
+		searchIconUsers.setOnMouseClicked(e -> {
+			boolean vis = txtSearchUsers.isVisible();
+			txtSearchUsers.setVisible(!vis);
+			txtSearchUsers.setManaged(!vis);
+			if (!vis) txtSearchUsers.requestFocus();
+			else txtSearchUsers.clear();
+		});
+
+		txtSearchUsers.textProperty().addListener((obs, oldVal, newVal) -> {
+			String lower = newVal.toLowerCase();
+			filteredUsers.setPredicate(item -> {
+				if (newVal == null || newVal.isEmpty()) return true;
+				return item.toLowerCase().contains(lower);
+			});
+		});
+
+		onlineUsersList = new ListView<>(filteredUsers);
 		onlineUsersList.setStyle("-fx-background-color: transparent; -fx-control-inner-background: transparent;");
 		onlineUsersList.setPrefHeight(150);
 		onlineUsersList.setCellFactory(lv -> createStyledCell());
@@ -525,6 +605,8 @@ public class ClienteGUI extends Application implements MessageListener {
 			chatHistories.clear();
 			unreadCounts.clear();
 			knownGroupMembers.clear();
+			masterGroupData.clear();
+			masterUsersData.clear();
 			currentChat = null;
 			chatHeaderBox = null;
 			watermark.setOpacity(0.18); // restore watermark opacity
@@ -536,9 +618,9 @@ public class ClienteGUI extends Application implements MessageListener {
 		VBox.setVgrow(onlineUsersList, Priority.SOMETIMES);
 
 		sidebar.getChildren().addAll(
-				lblGrupos, groupList, grpBtns, grpBtns2,
+				boxGruposHeader, txtSearchGroups, groupList, grpBtns, grpBtns2,
 				sep,
-				lblUsers, onlineUsersList, btnRefresh,
+				boxUsersHeader, txtSearchUsers, onlineUsersList, btnRefresh,
 				sep2, statusBox, btnDesconectar);
 
 		// ===== AREA CENTRAL DO CHAT =====
@@ -576,7 +658,7 @@ public class ClienteGUI extends Application implements MessageListener {
 
 		StackPane chatContainer = new StackPane();
 		
-		// Marca d'água permanente no fundo do chat
+		// Marca d'agua permanente no fundo do chat
 		try {
 			ImageView chatWatermark = new ImageView(new Image(getClass().getResourceAsStream("/view/edenIcon.png")));
 			chatWatermark.setOpacity(0.18);
@@ -605,6 +687,10 @@ public class ClienteGUI extends Application implements MessageListener {
 		HBox.setHgrow(txtMsg, Priority.ALWAYS);
 
 		Button btnSend = new Button("Enviar");
+		SVGPath sendIcon = new SVGPath();
+		sendIcon.setContent("M2.01 21L23 12 2.01 3 2 10l15 2-15 2z");
+		sendIcon.setFill(Color.web("#d8e87d"));
+		btnSend.setGraphic(sendIcon);
 		btnSend.setStyle(
 				"-fx-background-color: linear-gradient(to bottom, #4f5a2d, #3f4a23); -fx-text-fill: #d8e87d; -fx-background-radius: 20px; -fx-border-color: #5b6623; -fx-border-radius: 20px; -fx-border-width: 1px; -fx-padding: 10px 20px; -fx-font-size: 13px; -fx-font-weight: bold; -fx-cursor: hand;");
 		addHoverScale(btnSend);
@@ -697,15 +783,12 @@ public class ClienteGUI extends Application implements MessageListener {
 				String grupo = resultado.trim();
 				String resposta = tcp.join(grupo, eu);
 				if (resposta != null && resposta.startsWith("OK~/")) {
-					if (!groupList.getItems().contains(grupo)) {
-						groupList.getItems().add(grupo);
+					if (!masterGroupData.contains(grupo)) {
+						masterGroupData.add(grupo);
 					}
 					groupList.getSelectionModel().select(grupo);
-					addChatBubble(grupo, "SYSTEM", "Voce entrou no grupo " + grupo + ".", false, false, true);
-					try {
-						udp.send(grupo, eu, "~JOINED~");
-					} catch (Exception ex) {
-					}
+					addChatBubble(grupo, "SYSTEM", "Voc\u00EA entrou no grupo " + grupo + ".", false, false, true);
+					// UDP message for JOINED is now handled by the server
 				} else if (resposta != null && resposta.startsWith("ERRO~/")) {
 					showErrorOverlay("Erro ao Entrar", resposta.split("~/", 2)[1]);
 				}
@@ -718,23 +801,19 @@ public class ClienteGUI extends Application implements MessageListener {
 		if (selected == null)
 			return;
 
-		try {
-			udp.send(selected, eu, "~LEFT~");
-			Thread.sleep(150); // Aguarda o UDP chegar ao servidor antes de fechar via TCP
-		} catch (Exception ex) {
-		}
+		// UDP message for LEFT is now handled by the server
 
 		String resposta = tcp.leave(selected, eu);
 		if (resposta != null && resposta.startsWith("OK~/")) {
-			addChatBubble(selected, "SYSTEM", "Voce saiu do grupo.", false, false, true);
+			addChatBubble(selected, "SYSTEM", "Voc\u00EA saiu do grupo.", false, false, true);
 			// We delay removal slightly so the user sees the message? No, if we remove it,
 			// the history goes away.
 			// But leaving a group should maybe just remove it from the list.
-			groupList.getItems().remove(selected);
+			masterGroupData.remove(selected);
 			chatHistories.remove(selected);
 			unreadCounts.remove(selected);
 			knownGroupMembers.remove(selected);
-			if (!groupList.getItems().isEmpty()) {
+			if (!masterGroupData.isEmpty()) {
 				groupList.getSelectionModel().selectFirst();
 			} else {
 				currentChat = null;
@@ -775,16 +854,13 @@ public class ClienteGUI extends Application implements MessageListener {
 									if (grupoEscolhido != null) {
 										String res = tcp.join(grupoEscolhido, eu);
 										if (res != null && res.startsWith("OK~/")) {
-											if (!groupList.getItems().contains(grupoEscolhido)) {
-												groupList.getItems().add(grupoEscolhido);
+											if (!masterGroupData.contains(grupoEscolhido)) {
+												masterGroupData.add(grupoEscolhido);
 											}
 											groupList.getSelectionModel().select(grupoEscolhido);
 											addChatBubble(grupoEscolhido, "SYSTEM",
-													"Voce entrou no grupo " + grupoEscolhido + ".", false, false, true);
-											try {
-												udp.send(grupoEscolhido, eu, "~JOINED~");
-											} catch (Exception ex) {
-											}
+													"Voc\u00EA entrou no grupo " + grupoEscolhido + ".", false, false, true);
+											// UDP message for JOINED is now handled by the server
 										} else if (res != null && res.startsWith("ERRO~/")) {
 											showErrorOverlay("Erro ao Entrar", res.split("~/", 2)[1]);
 										}
@@ -812,18 +888,18 @@ public class ClienteGUI extends Application implements MessageListener {
 				Platform.runLater(() -> {
 					if (resposta != null && resposta.startsWith("OK~/")) {
 						String data = resposta.split("~/", 2)[1];
-						onlineUsersList.getItems().clear();
+						masterUsersData.clear();
 						if (!data.isEmpty()) {
 							String[] nomes = data.split(",");
 							for (String nome : nomes) {
 								nome = nome.trim();
 								if (!nome.isEmpty() && !nome.equalsIgnoreCase(eu.getNome())) {
-									onlineUsersList.getItems().add(nome);
+									masterUsersData.add(nome);
 								}
 							}
 						}
 						System.out.println("[GUI] [INFO] Usuarios online atualizados: "
-								+ onlineUsersList.getItems().size() + " exibidos.");
+								+ masterUsersData.size() + " exibidos.");
 					} else {
 						System.out.println("[GUI] [WARNING] Resposta inesperada do LISTUSERS: " + resposta);
 					}
@@ -871,6 +947,10 @@ public class ClienteGUI extends Application implements MessageListener {
 			parentHeader.getChildren().add(lblChatHeader);
 
 			Button btnDetails = new Button("Detalhes");
+			SVGPath menuIcon = new SVGPath();
+			menuIcon.setContent("M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z");
+			menuIcon.setFill(Color.web("#3f4a23"));
+			btnDetails.setGraphic(menuIcon);
 			btnDetails.setStyle(
 					"-fx-background-color: transparent; -fx-text-fill: #3f4a23; -fx-font-size: 12px; -fx-cursor: hand; -fx-border-color: #5b6623; -fx-border-radius: 12px; -fx-padding: 4px 10px;");
 			btnDetails.setOnAction(e -> {
@@ -1066,19 +1146,86 @@ public class ClienteGUI extends Application implements MessageListener {
 		lblGroup.setFont(Font.font("Segoe UI", FontWeight.BOLD, 18));
 		lblGroup.setTextFill(Color.web("#3f4a23"));
 
-		Label lblMembers = new Label("Membros Ativos Conhecidos:");
+		Label lblMembers = new Label("Membros no Servidor:");
 		lblMembers.setFont(Font.font("Segoe UI", FontWeight.BOLD, 12));
 		lblMembers.setTextFill(Color.web("#5b6623"));
 
 		ListView<String> membersList = new ListView<>();
 		membersList.setStyle("-fx-background-color: rgba(160,176,80,0.2); -fx-background-radius: 8px;");
-		membersList.setCellFactory(lv -> createStyledCell());
 
-		Set<String> members = knownGroupMembers.getOrDefault(grupo, new HashSet<>());
-		membersList.getItems().add(eu.getNome() + " (Voce)");
-		for (String m : members) {
-			if (!m.equals(eu.getNome()))
-				membersList.getItems().add(m);
+		StackPane overlay = new StackPane();
+		
+		Runnable closeOverlay = () -> {
+			FadeTransition fadeOut = new FadeTransition(Duration.millis(200), overlay);
+			fadeOut.setFromValue(1);
+			fadeOut.setToValue(0);
+			fadeOut.setOnFinished(ev -> root.getChildren().remove(overlay));
+			fadeOut.play();
+		};
+
+		membersList.setCellFactory(lv -> new ListCell<String>() {
+			@Override
+			protected void updateItem(String item, boolean empty) {
+				super.updateItem(item, empty);
+				if (empty || item == null) {
+					setText(null);
+					setGraphic(null);
+					setStyle("-fx-background-color: transparent;");
+				} else {
+					HBox cellBox = new HBox(10);
+					cellBox.setAlignment(Pos.CENTER_LEFT);
+					Label lblName = new Label(item);
+					lblName.setTextFill(Color.web("#3f4a23"));
+					lblName.setFont(Font.font("Segoe UI", FontWeight.BOLD, 13));
+					HBox.setHgrow(lblName, Priority.ALWAYS);
+					lblName.setMaxWidth(Double.MAX_VALUE);
+					
+					cellBox.getChildren().add(lblName);
+
+					if (!item.contains("(Voc\u00EA)")) {
+						SVGPath pvtIcon = new SVGPath();
+						pvtIcon.setContent("M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"); 
+						pvtIcon.setFill(Color.web("#5b6623"));
+						
+						Button btnPvt = new Button();
+						btnPvt.setGraphic(pvtIcon);
+						btnPvt.setStyle("-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0;");
+						addHoverScale(btnPvt);
+						
+						btnPvt.setOnAction(e -> {
+							closeOverlay.run();
+							groupList.getSelectionModel().clearSelection();
+							switchChatTo("[PVT] " + item);
+						});
+						
+						cellBox.getChildren().add(btnPvt);
+					}
+					
+					setGraphic(cellBox);
+					setStyle("-fx-background-color: transparent; -fx-padding: 8px; -fx-border-color: #8a9b3a; -fx-border-width: 0 0 1px 0;");
+				}
+			}
+		});
+
+		membersList.getItems().add(eu.getNome() + " (Voc\u00EA)");
+		if (tcp != null) {
+			String resp = tcp.listMembers(grupo);
+			if (resp != null && resp.startsWith("OK~/")) {
+				String[] parts = resp.split("~/", -1);
+				if (parts.length > 1 && !parts[1].isEmpty()) {
+					String[] mArr = parts[1].split(",");
+					for (String m : mArr) {
+						if (!m.trim().equalsIgnoreCase(eu.getNome())) {
+							membersList.getItems().add(m.trim());
+						}
+					}
+				}
+			} else {
+				Set<String> members = knownGroupMembers.getOrDefault(grupo, new HashSet<>());
+				for (String m : members) {
+					if (!m.equals(eu.getNome())) membersList.getItems().add(m);
+				}
+			}
 		}
 
 		HBox buttons = new HBox(12);
@@ -1092,25 +1239,15 @@ public class ClienteGUI extends Application implements MessageListener {
 				"-fx-background-color: linear-gradient(to bottom, #d4b06a, #c4a05a); -fx-text-fill: #3c3010; -fx-background-radius: 20px; -fx-border-color: #a88940; -fx-border-radius: 20px; -fx-border-width: 1px; -fx-padding: 8px 20px; -fx-font-size: 13px; -fx-font-weight: bold; -fx-cursor: hand;");
 
 		buttons.getChildren().addAll(btnClose, btnLeave);
-
 		box.getChildren().addAll(lblTitle, lblGroup, lblMembers, membersList, buttons);
-
-		StackPane overlay = new StackPane(box);
+		overlay.getChildren().add(box);
 		overlay.setStyle("-fx-background-color: rgba(50, 60, 20, 0.55);");
-
-		Runnable closeOverlay = () -> {
-			FadeTransition fadeOut = new FadeTransition(Duration.millis(200), overlay);
-			fadeOut.setFromValue(1);
-			fadeOut.setToValue(0);
-			fadeOut.setOnFinished(ev -> root.getChildren().remove(overlay));
-			fadeOut.play();
-		};
 
 		btnClose.setOnAction(e -> closeOverlay.run());
 		btnLeave.setOnAction(e -> {
 			closeOverlay.run();
 			// Reuse the existing leave logic
-			if (groupList.getItems().contains(grupo)) {
+			if (masterGroupData.contains(grupo)) {
 				groupList.getSelectionModel().select(grupo);
 				onLeaveGroup();
 			}
@@ -1128,6 +1265,10 @@ public class ClienteGUI extends Application implements MessageListener {
 	// OVERLAY DE ERRO (substitui Alert)
 	// =========================================================================
 	private void showErrorOverlay(String title, String message) {
+		showErrorOverlay(title, message, null);
+	}
+
+	private void showErrorOverlay(String title, String message, Runnable onOkAction) {
 		VBox errorBox = new VBox(15);
 		errorBox.setAlignment(Pos.CENTER);
 		errorBox.setMaxSize(420, 260);
@@ -1160,7 +1301,12 @@ public class ClienteGUI extends Application implements MessageListener {
 			FadeTransition fadeOut = new FadeTransition(Duration.millis(200), overlay);
 			fadeOut.setFromValue(1);
 			fadeOut.setToValue(0);
-			fadeOut.setOnFinished(ev -> root.getChildren().remove(overlay));
+			fadeOut.setOnFinished(ev -> {
+				root.getChildren().remove(overlay);
+				if (onOkAction != null) {
+					onOkAction.run();
+				}
+			});
 			fadeOut.play();
 		});
 
@@ -1327,14 +1473,14 @@ public class ClienteGUI extends Application implements MessageListener {
 			String chatId;
 			if (isPrivate) {
 				chatId = "[PVT] " + remetente.getNome();
-				if (!onlineUsersList.getItems().contains(remetente.getNome())) {
-					onlineUsersList.getItems().add(remetente.getNome());
+				if (!masterUsersData.contains(remetente.getNome())) {
+					masterUsersData.add(remetente.getNome());
 				}
 			} else {
 				chatId = destino;
 				if (chatId != null && !chatId.trim().isEmpty()) {
-					if (!groupList.getItems().contains(chatId)) {
-						groupList.getItems().add(chatId);
+					if (!masterGroupData.contains(chatId)) {
+						masterGroupData.add(chatId);
 					}
 					// Adiciona o usuario a lista de conhecidos do grupo
 					knownGroupMembers.putIfAbsent(chatId, new HashSet<>());
@@ -1369,7 +1515,17 @@ public class ClienteGUI extends Application implements MessageListener {
 	@Override
 	public void onShutdown() {
 		Platform.runLater(() -> {
-			showErrorOverlay("Servidor Encerrado", "O servidor foi desligado. A aplicacao sera fechada.");
+			showErrorOverlay("Servidor Encerrado", "O servidor foi desligado. A aplicacao sera fechada.", () -> {
+				Platform.exit();
+				System.exit(0);
+			});
+		});
+	}
+
+	@Override
+	public void onUpdateUsers() {
+		Platform.runLater(() -> {
+			refreshOnlineUsers();
 		});
 	}
 

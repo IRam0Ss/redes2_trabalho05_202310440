@@ -26,14 +26,16 @@ public class AtendimentoCliente implements Runnable {
 	/**
 	 * Construtor do AtendimentoCliente.
 	 * 
-	 * @param conexao Socket TCP da conexao atual
+	 * @param conexao     Socket TCP da conexao atual
 	 * @param gerenciador Referencia ao gerenciador de grupos e usuarios
 	 */
 	public AtendimentoCliente(Socket conexao, GerenciadorGrupos gerenciador) {
 		this.conexao = conexao;
 		this.gerenciador = gerenciador;
 		try {
-			this.escritorSaida = new PrintWriter(conexao.getOutputStream(), true);
+			this.escritorSaida = new PrintWriter(
+					new java.io.OutputStreamWriter(conexao.getOutputStream(), java.nio.charset.StandardCharsets.UTF_8),
+					true);
 		} catch (Exception e) {
 			System.err.println("[ATENDIMENTO] [ERROR] Falha ao criar escritor TCP: " + e.getMessage());
 		}
@@ -42,7 +44,8 @@ public class AtendimentoCliente implements Runnable {
 	@Override
 	public void run() {
 		try {
-			BufferedReader tradutorBytesStr = new BufferedReader(new InputStreamReader(this.conexao.getInputStream()));
+			BufferedReader tradutorBytesStr = new BufferedReader(
+					new InputStreamReader(this.conexao.getInputStream(), java.nio.charset.StandardCharsets.UTF_8));
 			String apduRecebida;
 
 			// le e trata as apdus recebidas
@@ -55,8 +58,10 @@ public class AtendimentoCliente implements Runnable {
 			if (this.usuarioAssociado != null) { // remove o usuario de todos os grupos quando ele sai
 				for (String grupo : this.gruposAssociados) {
 					this.gerenciador.leave(grupo, this.usuarioAssociado);
+					this.gerenciador.notificarMensagemSistema(grupo, this.usuarioAssociado, "~LEFT~");
 				}
 				this.gerenciador.removerUsuario(this.usuarioAssociado);
+				this.gerenciador.notificarAtualizacaoUsuarios();
 			}
 			try {
 				this.conexao.close();
@@ -95,7 +100,9 @@ public class AtendimentoCliente implements Runnable {
 						this.gruposAssociados.add(grupoJoin);
 					}
 					escritorSaida.println("OK~/Entrou no grupo " + grupoJoin);
-					System.out.println("[ATENDIMENTO] [INFO] Processamento de JOIN de '" + usuarioJoin.getNome() + "' concluido.");
+					System.out.println(
+							"[ATENDIMENTO] [INFO] Processamento de JOIN de '" + usuarioJoin.getNome() + "' concluido.");
+					this.gerenciador.notificarMensagemSistema(grupoJoin, usuarioJoin, "~JOINED~");
 				} else {
 					escritorSaida.println("ERRO~/Voce ja esta no grupo " + grupoJoin);
 					System.out
@@ -112,10 +119,13 @@ public class AtendimentoCliente implements Runnable {
 				boolean registrado = this.gerenciador.registrarUsuario(usuarioRegister);
 				if (registrado) {
 					escritorSaida.println("OK~/Registrado com sucesso");
-					System.out.println("[ATENDIMENTO] [INFO] Cliente '" + usuarioRegister.getNome() + "' registrado silenciosamente no servidor.");
+					System.out.println("[ATENDIMENTO] [INFO] Cliente '" + usuarioRegister.getNome()
+							+ "' registrado silenciosamente no servidor.");
+					this.gerenciador.notificarAtualizacaoUsuarios();
 				} else {
 					escritorSaida.println("ERRO~/Este nome de usuario ja esta em uso. Escolha outro.");
-					System.out.println("[ATENDIMENTO] [WARNING] Registro falhou para '" + usuarioRegister.getNome() + "' - Nome duplicado.");
+					System.out.println("[ATENDIMENTO] [WARNING] Registro falhou para '" + usuarioRegister.getNome()
+							+ "' - Nome duplicado.");
 				}
 				break;
 
@@ -128,6 +138,7 @@ public class AtendimentoCliente implements Runnable {
 					escritorSaida.println("OK~/Saiu do grupo " + grupoLeave);
 					System.out.println("[ATENDIMENTO] [INFO] Processamento de LEAVE de '" + usuarioLeave.getNome()
 							+ "' concluido.");
+					this.gerenciador.notificarMensagemSistema(grupoLeave, usuarioLeave, "~LEFT~");
 				} else {
 					escritorSaida.println("ERRO~/Voce nao esta no grupo " + grupoLeave);
 					System.out
@@ -148,19 +159,40 @@ public class AtendimentoCliente implements Runnable {
 
 			case Protocolo.LISTUSERS:
 				java.util.Set<InfoUser> usuarios = this.gerenciador.getTodosUsuariosAtivos();
-				System.out.println("[ATENDIMENTO] [DEBUG] LISTUSERS: encontrados " + usuarios.size() + " usuarios ativos.");
+				System.out.println(
+						"[ATENDIMENTO] [DEBUG] LISTUSERS: encontrados " + usuarios.size() + " usuarios ativos.");
 				StringBuilder sb = new StringBuilder("OK~/");
 				boolean first = true;
 				for (InfoUser u : usuarios) {
 					System.out.println("[ATENDIMENTO] [DEBUG]   -> Usuario ativo: " + u.toString());
-					if (!first) sb.append(",");
+					if (!first)
+						sb.append(",");
 					sb.append(u.getNome());
 					first = false;
 				}
 				String respostaListUsers = sb.toString();
 				System.out.println("[ATENDIMENTO] [DEBUG] LISTUSERS resposta enviada: " + respostaListUsers);
 				escritorSaida.println(respostaListUsers);
-				System.out.println("[ATENDIMENTO] [INFO] Processamento de LISTUSERS concluido. Total: " + usuarios.size());
+				System.out.println(
+						"[ATENDIMENTO] [INFO] Processamento de LISTUSERS concluido. Total: " + usuarios.size());
+				break;
+
+			case Protocolo.LISTMEMBERS:
+				String grupoList = APDU.extrairGrupo(apdu);
+				List<InfoUser> membrosGrupo = this.gerenciador.getTodosMembros(grupoList);
+				System.out.println("[ATENDIMENTO] [DEBUG] LISTMEMBERS para grupo '" + grupoList + "': encontrados "
+						+ membrosGrupo.size() + " membros.");
+				StringBuilder sbMembers = new StringBuilder("OK~/");
+				boolean firstMember = true;
+				for (InfoUser u : membrosGrupo) {
+					if (!firstMember)
+						sbMembers.append(",");
+					sbMembers.append(u.getNome());
+					firstMember = false;
+				}
+				escritorSaida.println(sbMembers.toString());
+				System.out.println(
+						"[ATENDIMENTO] [INFO] Processamento de LISTMEMBERS concluido para grupo: " + grupoList);
 				break;
 
 			case Protocolo.SEND:

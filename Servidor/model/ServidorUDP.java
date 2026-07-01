@@ -42,7 +42,7 @@ public class ServidorUDP implements Runnable {
 				DatagramPacket pacoteDadoRecebido = new DatagramPacket(dadosEntrada, dadosEntrada.length);
 				conexaoUDP.receive(pacoteDadoRecebido);
 
-				String apdu = new String(pacoteDadoRecebido.getData(), 0, pacoteDadoRecebido.getLength());
+				String apdu = new String(pacoteDadoRecebido.getData(), 0, pacoteDadoRecebido.getLength(), java.nio.charset.StandardCharsets.UTF_8);
 				processarAPDU(conexaoUDP, apdu);
 
 			}
@@ -77,7 +77,7 @@ public class ServidorUDP implements Runnable {
 				// montar a string que os clientes alvos vao receber
 				String apduEnviada = APDU.montarSend(nomeGrupo, usuarioRemetente, mensagem);
 
-				byte[] dadosEnviados = apduEnviada.getBytes();
+				byte[] dadosEnviados = apduEnviada.getBytes(java.nio.charset.StandardCharsets.UTF_8);
 
 				List<InfoUser> destinatarios = gerenciador.getMembrosEnvio(nomeGrupo, usuarioRemetente);
 
@@ -110,7 +110,7 @@ public class ServidorUDP implements Runnable {
 				if (destinoInfo != null) {
 					try {
 						// Repassamos a apdu exata (que o cliente ja montou) para o destino
-						byte[] dadosPvt = apdu.getBytes();
+						byte[] dadosPvt = apdu.getBytes(java.nio.charset.StandardCharsets.UTF_8);
 						InetAddress ipDest = InetAddress.getByName(destinoInfo.getIp());
 						DatagramPacket pacotePvt = new DatagramPacket(dadosPvt, dadosPvt.length, ipDest, destinoInfo.getPorta());
 						conexaoUDP.send(pacotePvt);
