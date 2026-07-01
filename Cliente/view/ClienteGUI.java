@@ -614,6 +614,11 @@ public class ClienteGUI extends Application implements MessageListener {
 			switchView(createSplash());
 		});
 
+		Button btnTutorial = new Button("? Iniciar Tutorial");
+		btnTutorial.setStyle("-fx-background-color: linear-gradient(to bottom, #a4b455, #8a9b3a); -fx-text-fill: #1a1e0b; -fx-font-size: 11px; -fx-padding: 6px 12px; -fx-background-radius: 20px; -fx-cursor: hand; -fx-font-weight: bold; -fx-border-color: #5b6623; -fx-border-radius: 20px; -fx-border-width: 1px;");
+		btnTutorial.setMaxWidth(Double.MAX_VALUE);
+		addHoverScale(btnTutorial);
+
 		VBox.setVgrow(groupList, Priority.SOMETIMES);
 		VBox.setVgrow(onlineUsersList, Priority.SOMETIMES);
 
@@ -621,7 +626,7 @@ public class ClienteGUI extends Application implements MessageListener {
 				boxGruposHeader, txtSearchGroups, groupList, grpBtns, grpBtns2,
 				sep,
 				boxUsersHeader, txtSearchUsers, onlineUsersList, btnRefresh,
-				sep2, statusBox, btnDesconectar);
+				sep2, statusBox, btnTutorial, btnDesconectar);
 
 		// ===== AREA CENTRAL DO CHAT =====
 		VBox centerArea = new VBox(0);
@@ -704,6 +709,48 @@ public class ClienteGUI extends Application implements MessageListener {
 
 		chatPane.setLeft(sidebar);
 		chatPane.setCenter(centerArea);
+
+		btnTutorial.setOnAction(e -> {
+			List<TutorialOverlay.TutorialStep> steps = new ArrayList<>();
+			steps.add(new TutorialOverlay.TutorialStep(
+					sidebar,
+					"Diretrizes do Jardim",
+					"Bem-vindo ao E.D.E.N.. Esta e a sua interface de comunicacao secreta. Siga este breve tutorial para entender as funcionalidades principais e se familiarizar com a sua estacao de trabalho."
+			));
+			steps.add(new TutorialOverlay.TutorialStep(
+					groupList,
+					"Seus Grupos",
+					"Nesta area ficam os grupos que voce participa. O E.D.E.N. organiza as comunicacoes em salas protegidas para que possamos coordenar nossas acoes de maneira isolada."
+			));
+			steps.add(new TutorialOverlay.TutorialStep(
+					grpBtns,
+					"Acoes de Grupos",
+					"Use estes botoes para 'Criar' ou 'Entrar' em novos grupos, ou para 'Sair' de um grupo que voce nao precisa mais acompanhar."
+			));
+			steps.add(new TutorialOverlay.TutorialStep(
+					grpBtns2,
+					"Lista Global",
+					"Este botao solicita ao servidor a lista completa de todos os grupos ativos no momento. Util para descobrir novas frentes de acao."
+			));
+			steps.add(new TutorialOverlay.TutorialStep(
+					onlineUsersList,
+					"Agentes Online",
+					"Esta area exibe todos os outros clientes (agentes) atualmente conectados ao servidor. Voce pode clicar em um nome para iniciar um canal de comunicacao direta e privada (PVT)."
+			));
+			steps.add(new TutorialOverlay.TutorialStep(
+					boxUsersHeader,
+					"Busca de Agentes e Grupos",
+					"Clicando no icone de lupa ao lado dos titulos, voce pode pesquisar e filtrar rapidamente por um agente ou grupo especifico nas listas."
+			));
+			steps.add(new TutorialOverlay.TutorialStep(
+					inputBar,
+					"Transmissao",
+					"Esta e a sua barra de transmissao. Digite suas mensagens aqui e envie para o grupo ou agente que estiver selecionado. A comunicacao aqui e vital."
+			));
+
+			TutorialOverlay overlay = new TutorialOverlay(root, steps);
+			overlay.start();
+		});
 
 		return chatPane;
 	}
