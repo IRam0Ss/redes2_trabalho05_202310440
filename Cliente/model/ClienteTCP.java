@@ -24,15 +24,17 @@ public class ClienteTCP {
 	/**
 	 * Construtor que inicializa a conexao TCP com o servidor.
 	 * 
-	 * @param ipServidor IP do servidor
+	 * @param ipServidor    IP do servidor
 	 * @param portaServidor Porta do servidor
 	 * @throws UnknownHostException Caso o host nao seja encontrado
-	 * @throws IOException Erro de entrada/saida na conexao
+	 * @throws IOException          Erro de entrada/saida na conexao
 	 */
 	public ClienteTCP(String ipServidor, int portaServidor) throws UnknownHostException, IOException {
 		this.conexaoTCP = new Socket(ipServidor, portaServidor);
-		this.escritorSaida = new PrintWriter(new java.io.OutputStreamWriter(conexaoTCP.getOutputStream(), java.nio.charset.StandardCharsets.UTF_8), true);
-		this.leitorEntrada = new BufferedReader(new InputStreamReader(conexaoTCP.getInputStream(), java.nio.charset.StandardCharsets.UTF_8));
+		this.escritorSaida = new PrintWriter(
+				new java.io.OutputStreamWriter(conexaoTCP.getOutputStream(), java.nio.charset.StandardCharsets.UTF_8), true);
+		this.leitorEntrada = new BufferedReader(
+				new InputStreamReader(conexaoTCP.getInputStream(), java.nio.charset.StandardCharsets.UTF_8));
 		System.out.println("[CLIENTE:TCP] [INFO] Conectado ao servidor " + ipServidor + ":" + portaServidor);
 	}
 
@@ -74,6 +76,7 @@ public class ClienteTCP {
 
 	/**
 	 * Solicita a lista de grupos ativos no servidor
+	 * 
 	 * @return Resposta do servidor formatada
 	 */
 	public synchronized String list() {
@@ -95,7 +98,8 @@ public class ClienteTCP {
 	 * @return Resposta do servidor
 	 */
 	public synchronized String register(InfoUser usuario) {
-		String apdu = Protocolo.REGISTER + Protocolo.SEPARADOR_CAMPO_APDU + "GLOBAL" + Protocolo.SEPARADOR_CAMPO_APDU + usuario.empacotar();
+		String apdu = Protocolo.REGISTER + Protocolo.SEPARADOR_CAMPO_APDU + "GLOBAL" + Protocolo.SEPARADOR_CAMPO_APDU
+				+ usuario.empacotar();
 		escritorSaida.println(apdu);
 		try {
 			return leitorEntrada.readLine();
@@ -106,6 +110,7 @@ public class ClienteTCP {
 
 	/**
 	 * Solicita a lista de usuarios conectados ao servidor
+	 * 
 	 * @return Resposta do servidor com os nomes separados por virgula
 	 */
 	public synchronized String listUsers() {
@@ -120,6 +125,7 @@ public class ClienteTCP {
 
 	/**
 	 * Solicita a lista de membros de um grupo
+	 * 
 	 * @param nomeGrupo Nome do grupo
 	 * @return Resposta do servidor com os nomes separados por virgula
 	 */
@@ -127,8 +133,10 @@ public class ClienteTCP {
 		String safeGrupo = nomeGrupo;
 		try {
 			safeGrupo = java.net.URLEncoder.encode(nomeGrupo, "UTF-8");
-		} catch (Exception e) {}
-		String apdu = Protocolo.LISTMEMBERS + Protocolo.SEPARADOR_CAMPO_APDU + safeGrupo + Protocolo.SEPARADOR_CAMPO_APDU + "dummy";
+		} catch (Exception e) {
+		}
+		String apdu = Protocolo.LISTMEMBERS + Protocolo.SEPARADOR_CAMPO_APDU + safeGrupo + Protocolo.SEPARADOR_CAMPO_APDU
+				+ "dummy";
 		escritorSaida.println(apdu);
 		System.out.println("[CLIENTE:TCP] [INFO] LISTMEMBERS enviado ao servidor para grupo: " + nomeGrupo);
 		try {

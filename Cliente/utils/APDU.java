@@ -10,7 +10,7 @@ public class APDU {
 	 * Monta a APDU de join seguindo o protocolo.
 	 * 
 	 * @param nomeGrupo Nome do grupo
-	 * @param usuario Objeto InfoUser
+	 * @param usuario   Objeto InfoUser
 	 * @return APDU formatada
 	 */
 	public static String montarJoin(String nomeGrupo, InfoUser usuario) {
@@ -29,7 +29,7 @@ public class APDU {
 	 * Monta a APDU de leave seguindo o protocolo.
 	 * 
 	 * @param nomeGrupo Nome do grupo
-	 * @param usuario Objeto InfoUser
+	 * @param usuario   Objeto InfoUser
 	 * @return APDU formatada
 	 */
 	public static String montarLeave(String nomeGrupo, InfoUser usuario) {
@@ -47,8 +47,8 @@ public class APDU {
 	 * Monta a APDU de send seguindo o protocolo.
 	 * 
 	 * @param nomeGrupo Nome do grupo
-	 * @param usuario Objeto InfoUser
-	 * @param mensagem Conteudo da mensagem
+	 * @param usuario   Objeto InfoUser
+	 * @param mensagem  Conteudo da mensagem
 	 * @return APDU formatada
 	 */
 	public static String montarSend(String nomeGrupo, InfoUser usuario, String mensagem) {
@@ -68,8 +68,8 @@ public class APDU {
 	 * Monta a APDU de sendpvt seguindo o protocolo.
 	 * 
 	 * @param nomeDestinatario Nome do usuario destino
-	 * @param usuario Objeto InfoUser remetente
-	 * @param mensagem Conteudo da mensagem
+	 * @param usuario          Objeto InfoUser remetente
+	 * @param mensagem         Conteudo da mensagem
 	 * @return APDU formatada
 	 */
 	public static String montarSendPvt(String nomeDestinatario, InfoUser usuario, String mensagem) {

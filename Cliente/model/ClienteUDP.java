@@ -25,10 +25,10 @@ public class ClienteUDP implements Runnable {
 	/**
 	 * Construtor que inicializa o socket UDP do cliente.
 	 * 
-	 * @param ipServidor IP do servidor alvo
+	 * @param ipServidor    IP do servidor alvo
 	 * @param portaServidor Porta do servidor alvo
 	 * @throws UnknownHostException Caso o host nao seja encontrado
-	 * @throws SocketException Caso haja erro ao vincular a porta
+	 * @throws SocketException      Caso haja erro ao vincular a porta
 	 */
 	public ClienteUDP(String ipServidor, int portaServidor)
 			throws UnknownHostException, SocketException {
@@ -107,7 +107,8 @@ public class ClienteUDP implements Runnable {
 	}
 
 	/**
-	 * Thread principal responsavel pela recepcao de mensagens enviadas pelo servidor.
+	 * Thread principal responsavel pela recepcao de mensagens enviadas pelo
+	 * servidor.
 	 */
 	public void run() {
 		byte[] bufferRecepcao = new byte[BUFFER];
@@ -116,34 +117,41 @@ public class ClienteUDP implements Runnable {
 			DatagramPacket pacoteRecebido = new DatagramPacket(bufferRecepcao, bufferRecepcao.length);
 			try {
 				socketUDP.receive(pacoteRecebido);
-				String apdu = new String(pacoteRecebido.getData(), 0, pacoteRecebido.getLength(), java.nio.charset.StandardCharsets.UTF_8);
-				
+				String apdu = new String(pacoteRecebido.getData(), 0, pacoteRecebido.getLength(),
+						java.nio.charset.StandardCharsets.UTF_8);
+
 				String comando = APDU.extrairComando(apdu);
 				if (utils.Protocolo.SHUTDOWN.equals(comando)) {
 					System.out.println("\n[SISTEMA] O servidor foi encerrado. A aplicacao sera finalizada.");
-					if (listener != null) listener.onShutdown();
-					else System.exit(0);
+					if (listener != null)
+						listener.onShutdown();
+					else
+						System.exit(0);
 				}
-				
+
 				if (utils.Protocolo.UPDATE_USERS.equals(comando)) {
 					System.out.println("[CLIENTE:UDP] [INFO] Recebida notificacao de atualizacao de usuarios.");
-					if (listener != null) listener.onUpdateUsers();
+					if (listener != null)
+						listener.onUpdateUsers();
 					continue;
 				}
-				
+
 				if (utils.Protocolo.SENDPVT.equals(comando)) {
 					InfoUser remetente = APDU.extrairUsuario(apdu);
 					String mensagemPvt = APDU.extrairMensagem(apdu);
 					System.out.println("\n[MENSAGEM PRIVADA] " + remetente.getNome() + " diz: " + mensagemPvt);
-					if (listener != null) listener.onMessageReceived(remetente.getNome(), remetente, mensagemPvt, true);
+					if (listener != null)
+						listener.onMessageReceived(remetente.getNome(), remetente, mensagemPvt, true);
 					continue; // Pula o processamento padrao de grupo abaixo
 				}
 
 				InfoUser usuario = APDU.extrairUsuario(apdu);
 				String mensagem = APDU.extrairMensagem(apdu);
 				String grupo = APDU.extrairGrupo(apdu);
-				System.out.println("\n[CLIENTE:UDP] [INFO] Nova mensagem recebida no grupo " + grupo + ":\n" + usuario.toString() + " enviou: " + mensagem);
-				if (listener != null) listener.onMessageReceived(grupo, usuario, mensagem, false);
+				System.out.println("\n[CLIENTE:UDP] [INFO] Nova mensagem recebida no grupo " + grupo + ":\n"
+						+ usuario.toString() + " enviou: " + mensagem);
+				if (listener != null)
+					listener.onMessageReceived(grupo, usuario, mensagem, false);
 
 			} catch (SocketException e) {
 				// Excecao esperada ao fechar o socket durante o receive

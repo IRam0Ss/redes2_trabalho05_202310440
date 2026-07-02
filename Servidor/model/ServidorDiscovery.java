@@ -10,45 +10,46 @@ import java.net.DatagramSocket;
  */
 public class ServidorDiscovery implements Runnable {
 
-    private final int DISCOVERY_PORT = 5001;
-    private final String DISCOVER_MESSAGE = "DISCOVER_EDEN";
-    private final String RESPONSE_MESSAGE = "EDEN_HERE";
-    private DatagramSocket socket;
+	private final int DISCOVERY_PORT = 5001;
+	private final String DISCOVER_MESSAGE = "DISCOVER_EDEN";
+	private final String RESPONSE_MESSAGE = "EDEN_HERE";
+	private DatagramSocket socket;
 
-    @Override
-    public void run() {
-        try {
-            socket = new DatagramSocket(DISCOVERY_PORT);
-            System.out.println("[DISCOVERY] Farol UDP ligado na porta " + DISCOVERY_PORT + " aguardando buscas...");
+	@Override
+	public void run() {
+		try {
+			socket = new DatagramSocket(DISCOVERY_PORT);
+			System.out.println("[DISCOVERY] Farol UDP ligado na porta " + DISCOVERY_PORT + " aguardando buscas...");
 
-            byte[] buffer = new byte[256];
+			byte[] buffer = new byte[256];
 
-            while (!socket.isClosed()) {
-                DatagramPacket pacoteRecebido = new DatagramPacket(buffer, buffer.length);
-                socket.receive(pacoteRecebido);
+			while (!socket.isClosed()) {
+				DatagramPacket pacoteRecebido = new DatagramPacket(buffer, buffer.length);
+				socket.receive(pacoteRecebido);
 
-                String mensagem = new String(pacoteRecebido.getData(), 0, pacoteRecebido.getLength(), java.nio.charset.StandardCharsets.UTF_8).trim();
+				String mensagem = new String(pacoteRecebido.getData(), 0, pacoteRecebido.getLength(),
+						java.nio.charset.StandardCharsets.UTF_8).trim();
 
-                if (mensagem.equals(DISCOVER_MESSAGE)) {
-                    System.out.println("[DISCOVERY] Busca recebida de: " + pacoteRecebido.getAddress().getHostAddress());
-                    
-                    // Responde dizendo "Estou aqui"
-                    byte[] dadosResposta = RESPONSE_MESSAGE.getBytes(java.nio.charset.StandardCharsets.UTF_8);
-                    DatagramPacket pacoteResposta = new DatagramPacket(
-                            dadosResposta,
-                            dadosResposta.length,
-                            pacoteRecebido.getAddress(),
-                            pacoteRecebido.getPort());
-                    
-                    socket.send(pacoteResposta);
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("[DISCOVERY] [ERROR] Falha no farol: " + e.getMessage());
-        } finally {
-            if (socket != null && !socket.isClosed()) {
-                socket.close();
-            }
-        }
-    }
+				if (mensagem.equals(DISCOVER_MESSAGE)) {
+					System.out.println("[DISCOVERY] Busca recebida de: " + pacoteRecebido.getAddress().getHostAddress());
+
+					// Responde dizendo "Estou aqui"
+					byte[] dadosResposta = RESPONSE_MESSAGE.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+					DatagramPacket pacoteResposta = new DatagramPacket(
+							dadosResposta,
+							dadosResposta.length,
+							pacoteRecebido.getAddress(),
+							pacoteRecebido.getPort());
+
+					socket.send(pacoteResposta);
+				}
+			}
+		} catch (Exception e) {
+			System.err.println("[DISCOVERY] [ERROR] Falha no farol: " + e.getMessage());
+		} finally {
+			if (socket != null && !socket.isClosed()) {
+				socket.close();
+			}
+		}
+	}
 }

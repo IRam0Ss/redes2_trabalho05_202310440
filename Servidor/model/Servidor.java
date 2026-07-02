@@ -33,9 +33,11 @@ public class Servidor {
 			java.util.Set<utils.InfoUser> usuarios = gerenciador.getTodosUsuariosAtivos();
 			try (java.net.DatagramSocket socketUDP = new java.net.DatagramSocket()) {
 				for (utils.InfoUser u : usuarios) {
-					String apdu = Protocolo.SHUTDOWN + Protocolo.SEPARADOR_CAMPO_APDU + "GLOBAL" + Protocolo.SEPARADOR_CAMPO_APDU + u.empacotar() + Protocolo.SEPARADOR_CAMPO_APDU + "Desligando";
+					String apdu = Protocolo.SHUTDOWN + Protocolo.SEPARADOR_CAMPO_APDU + "GLOBAL" + Protocolo.SEPARADOR_CAMPO_APDU
+							+ u.empacotar() + Protocolo.SEPARADOR_CAMPO_APDU + "Desligando";
 					byte[] dados = apdu.getBytes(java.nio.charset.StandardCharsets.UTF_8);
-					java.net.DatagramPacket pacote = new java.net.DatagramPacket(dados, dados.length, java.net.InetAddress.getByName(u.getIp()), u.getPorta());
+					java.net.DatagramPacket pacote = new java.net.DatagramPacket(dados, dados.length,
+							java.net.InetAddress.getByName(u.getIp()), u.getPorta());
 					socketUDP.send(pacote);
 				}
 			} catch (Exception e) {

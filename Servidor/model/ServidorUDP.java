@@ -23,7 +23,7 @@ public class ServidorUDP implements Runnable {
 	/**
 	 * Construtor do ServidorUDP.
 	 * 
-	 * @param porta A porta UDP a ser escutada
+	 * @param porta       A porta UDP a ser escutada
 	 * @param gerenciador O gerenciador de grupos e usuarios
 	 */
 	public ServidorUDP(int porta, GerenciadorGrupos gerenciador) {
@@ -42,7 +42,8 @@ public class ServidorUDP implements Runnable {
 				DatagramPacket pacoteDadoRecebido = new DatagramPacket(dadosEntrada, dadosEntrada.length);
 				conexaoUDP.receive(pacoteDadoRecebido);
 
-				String apdu = new String(pacoteDadoRecebido.getData(), 0, pacoteDadoRecebido.getLength(), java.nio.charset.StandardCharsets.UTF_8);
+				String apdu = new String(pacoteDadoRecebido.getData(), 0, pacoteDadoRecebido.getLength(),
+						java.nio.charset.StandardCharsets.UTF_8);
 				processarAPDU(conexaoUDP, apdu);
 
 			}
@@ -57,7 +58,7 @@ public class ServidorUDP implements Runnable {
 	 * Processa a APDU recebida pelo servidor via UDP.
 	 * 
 	 * @param conexaoUDP Socket UDP para enviar respostas
-	 * @param apdu APDU recebida
+	 * @param apdu       APDU recebida
 	 */
 	private void processarAPDU(DatagramSocket conexaoUDP, String apdu) {
 
@@ -72,7 +73,8 @@ public class ServidorUDP implements Runnable {
 				InfoUser usuarioRemetente = APDU.extrairUsuario(apdu);
 				String mensagem = APDU.extrairMensagem(apdu);
 
-				System.out.println("[SERVIDOR:UDP] [INFO] Recebido comando SEND do usuario '" + usuarioRemetente.getNome() + "' para o grupo '" + nomeGrupo + "'");
+				System.out.println("[SERVIDOR:UDP] [INFO] Recebido comando SEND do usuario '" + usuarioRemetente.getNome()
+						+ "' para o grupo '" + nomeGrupo + "'");
 
 				// montar a string que os clientes alvos vao receber
 				String apduEnviada = APDU.montarSend(nomeGrupo, usuarioRemetente, mensagem);
@@ -89,11 +91,14 @@ public class ServidorUDP implements Runnable {
 								membroDestinatario.getPorta());
 
 						conexaoUDP.send(pacoteEnvio);
-						System.out.println("[SERVIDOR:UDP] [INFO] Encaminhando APDU SEND para '" + membroDestinatario.getNome() + "'");
+						System.out
+								.println("[SERVIDOR:UDP] [INFO] Encaminhando APDU SEND para '" + membroDestinatario.getNome() + "'");
 
 					} catch (Exception e) {
-						System.err.println("[SERVIDOR:UDP] [ERROR] Falha ao enviar para '" + membroDestinatario.getNome() + "' - " + e.getMessage());
-						// Como e um loop de envio, apenas logamos, nao paramos o envio para os outros membros
+						System.err.println("[SERVIDOR:UDP] [ERROR] Falha ao enviar para '" + membroDestinatario.getNome() + "' - "
+								+ e.getMessage());
+						// Como e um loop de envio, apenas logamos, nao paramos o envio para os outros
+						// membros
 					}
 				}
 
@@ -103,7 +108,8 @@ public class ServidorUDP implements Runnable {
 				String nomeDestino = APDU.extrairGrupo(apdu);
 				InfoUser remetentePvt = APDU.extrairUsuario(apdu);
 
-				System.out.println("[SERVIDOR:UDP] [INFO] Recebido comando SENDPVT de '" + remetentePvt.getNome() + "' para '" + nomeDestino + "'");
+				System.out.println("[SERVIDOR:UDP] [INFO] Recebido comando SENDPVT de '" + remetentePvt.getNome() + "' para '"
+						+ nomeDestino + "'");
 
 				InfoUser destinoInfo = gerenciador.buscarUsuarioPorNome(nomeDestino);
 

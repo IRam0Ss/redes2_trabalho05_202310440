@@ -20,7 +20,7 @@ public class ServidorTCP implements Runnable {
 	/**
 	 * Construtor do ServidorTCP.
 	 * 
-	 * @param porta A porta TCP a ser escutada
+	 * @param porta       A porta TCP a ser escutada
 	 * @param gerenciador O gerenciador de grupos e usuarios
 	 */
 	public ServidorTCP(int porta, GerenciadorGrupos gerenciador) {
@@ -35,7 +35,8 @@ public class ServidorTCP implements Runnable {
 
 			while (true) { // mantem a conexao existente sempre esperando clientes se conectarem
 				Socket conexaoClienteTCP = servidorTCP.accept(); // conexao do cliente com o servidor
-				System.out.println("[SERVIDOR:TCP] [INFO] Nova conexao recebida de " + conexaoClienteTCP.getInetAddress().getHostAddress());
+				System.out.println(
+						"[SERVIDOR:TCP] [INFO] Nova conexao recebida de " + conexaoClienteTCP.getInetAddress().getHostAddress());
 
 				// criar uma Thread do servidor para cada cliente unico
 				Thread threadAtendimentoCliente = new Thread(new AtendimentoCliente(conexaoClienteTCP, gerenciador));

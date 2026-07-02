@@ -30,7 +30,8 @@ public class GerenciadorGrupos {
 	 * 
 	 * @param nomeGrupo Nome do grupo desejado
 	 * @param usuario   Objeto InfoUser contendo os dados do usuario
-	 * @return true se o usuario foi adicionado com sucesso, false se ele ja estava no grupo
+	 * @return true se o usuario foi adicionado com sucesso, false se ele ja estava
+	 *         no grupo
 	 */
 	public synchronized boolean join(String nomeGrupo, InfoUser usuario) {
 
@@ -42,21 +43,25 @@ public class GerenciadorGrupos {
 		List<InfoUser> membros = gruposExistentes.get(nomeGrupo); // lista todos os membros do grupo
 
 		if (membros.contains(usuario)) {
-			System.out.println("[GERENCIADOR] [WARNING] Usuario '" + usuario.getNome() + "' tentou entrar no grupo '" + nomeGrupo + "' mas ja e membro");
+			System.out.println("[GERENCIADOR] [WARNING] Usuario '" + usuario.getNome() + "' tentou entrar no grupo '"
+					+ nomeGrupo + "' mas ja e membro");
 			return false;
 		}
 		membros.add(usuario); // adiciona o novo membro
-		System.out.println("[GERENCIADOR] [INFO] Usuario '" + usuario.getNome() + "' entrou no grupo '" + nomeGrupo + "'. Total de membros: " + membros.size());
+		System.out.println("[GERENCIADOR] [INFO] Usuario '" + usuario.getNome() + "' entrou no grupo '" + nomeGrupo
+				+ "'. Total de membros: " + membros.size());
 		return true;
 	} // end join
 
 	/**
-	 * Remove um usuario de um grupo. Se o grupo ficar vazio apos a remocao, ele e deletado
+	 * Remove um usuario de um grupo. Se o grupo ficar vazio apos a remocao, ele e
+	 * deletado
 	 * para evitar acumulo de grupos fantasmas na memoria.
 	 * 
 	 * @param nomeGrupo Nome do grupo
 	 * @param usuario   Objeto InfoUser contendo os dados do usuario
-	 * @return true se removido com sucesso, false se o grupo nao existir ou usuario nao pertencer a ele
+	 * @return true se removido com sucesso, false se o grupo nao existir ou usuario
+	 *         nao pertencer a ele
 	 */
 	public synchronized boolean leave(String nomeGrupo, InfoUser usuario) {
 		if (!gruposExistentes.containsKey(nomeGrupo)) {
@@ -66,11 +71,13 @@ public class GerenciadorGrupos {
 		List<InfoUser> membros = gruposExistentes.get(nomeGrupo);
 
 		if (!membros.contains(usuario)) {
-			System.out.println("[GERENCIADOR] [WARNING] Usuario '" + usuario.getNome() + "' tentou sair do grupo '" + nomeGrupo + "' sem ser membro");
+			System.out.println("[GERENCIADOR] [WARNING] Usuario '" + usuario.getNome() + "' tentou sair do grupo '"
+					+ nomeGrupo + "' sem ser membro");
 			return false;
 		}
 		membros.remove(usuario);
-		System.out.println("[GERENCIADOR] [INFO] Usuario '" + usuario.getNome() + "' saiu do grupo '" + nomeGrupo + "'. Total de membros: " + membros.size());
+		System.out.println("[GERENCIADOR] [INFO] Usuario '" + usuario.getNome() + "' saiu do grupo '" + nomeGrupo
+				+ "'. Total de membros: " + membros.size());
 
 		if (membros.isEmpty()) { // se todos os membros sairam, deleta o grupo
 			gruposExistentes.remove(nomeGrupo);
@@ -81,7 +88,8 @@ public class GerenciadorGrupos {
 
 	/**
 	 * Retorna a lista de membros de um grupo, excluindo o remetente.
-	 * E utilizado na operacao SEND para encaminhar a mensagem para todos os membros corretos.
+	 * E utilizado na operacao SEND para encaminhar a mensagem para todos os membros
+	 * corretos.
 	 * 
 	 * @param nomeGrupo        Nome do grupo
 	 * @param usuarioRemetente Usuario que esta enviando a mensagem
@@ -97,12 +105,14 @@ public class GerenciadorGrupos {
 		List<InfoUser> listaMembros = new ArrayList<>(gruposExistentes.get(nomeGrupo));
 
 		if (!listaMembros.contains(usuarioRemetente)) {
-			System.out.println("[GERENCIADOR] [WARNING] Bloqueado: Usuario '" + usuarioRemetente.getNome() + "' tentou enviar mensagem para o grupo '" + nomeGrupo + "' sem ser membro");
+			System.out.println("[GERENCIADOR] [WARNING] Bloqueado: Usuario '" + usuarioRemetente.getNome()
+					+ "' tentou enviar mensagem para o grupo '" + nomeGrupo + "' sem ser membro");
 			return new ArrayList<>();
 		}
 
 		listaMembros.remove(usuarioRemetente);
-		System.out.println("[GERENCIADOR] [INFO] Mensagem de '" + usuarioRemetente.getNome() + "' autorizada para " + listaMembros.size() + " destinatario(s) no grupo '" + nomeGrupo + "'");
+		System.out.println("[GERENCIADOR] [INFO] Mensagem de '" + usuarioRemetente.getNome() + "' autorizada para "
+				+ listaMembros.size() + " destinatario(s) no grupo '" + nomeGrupo + "'");
 		return listaMembros;
 	} // fim do getMembrosEnvio
 
@@ -157,7 +167,8 @@ public class GerenciadorGrupos {
 			}
 		}
 		todosUsuariosAtivos.add(usuario);
-		System.out.println("[GERENCIADOR] [INFO] Usuario '" + usuario.getNome() + "' registrado com sucesso. Total ativos: " + todosUsuariosAtivos.size());
+		System.out.println("[GERENCIADOR] [INFO] Usuario '" + usuario.getNome() + "' registrado com sucesso. Total ativos: "
+				+ todosUsuariosAtivos.size());
 		return true;
 	}
 
@@ -195,7 +206,8 @@ public class GerenciadorGrupos {
 	}
 
 	/**
-	 * Notifica todos os usuarios ativos via UDP que a lista de usuarios online mudou.
+	 * Notifica todos os usuarios ativos via UDP que a lista de usuarios online
+	 * mudou.
 	 */
 	public void notificarAtualizacaoUsuarios() {
 		new Thread(() -> {
@@ -210,9 +222,11 @@ public class GerenciadorGrupos {
 						java.net.InetAddress ipDest = java.net.InetAddress.getByName(u.getIp());
 						java.net.DatagramPacket pacote = new java.net.DatagramPacket(dados, dados.length, ipDest, u.getPorta());
 						socketUDP.send(pacote);
-					} catch (Exception e) {}
+					} catch (Exception e) {
+					}
 				}
-				System.out.println("[GERENCIADOR] [INFO] Notificacao UPDATE_USERS disparada para " + ativos.size() + " clientes.");
+				System.out
+						.println("[GERENCIADOR] [INFO] Notificacao UPDATE_USERS disparada para " + ativos.size() + " clientes.");
 			} catch (Exception e) {
 				System.err.println("[GERENCIADOR] [ERROR] Falha ao notificar atualizacao: " + e.getMessage());
 			}
@@ -228,16 +242,18 @@ public class GerenciadorGrupos {
 			try (java.net.DatagramSocket socketUDP = new java.net.DatagramSocket()) {
 				String apduEnviada = utils.APDU.montarSend(nomeGrupo, remetenteVirtual, mensagem);
 				byte[] dados = apduEnviada.getBytes(java.nio.charset.StandardCharsets.UTF_8);
-				
+
 				List<InfoUser> membros;
 				synchronized (this) {
-					if (!gruposExistentes.containsKey(nomeGrupo)) return;
+					if (!gruposExistentes.containsKey(nomeGrupo))
+						return;
 					membros = new ArrayList<>(gruposExistentes.get(nomeGrupo));
 				}
-				
+
 				// Nao removemos o remetenteVirtual pois queremos que ele mesmo veja a msg?
 				// Na verdade o Cliente que enviou ja mostra na tela localmente (addChatBubble).
-				// Entao removemos o remetente para ele nao receber de volta se ele ainda estiver na lista.
+				// Entao removemos o remetente para ele nao receber de volta se ele ainda
+				// estiver na lista.
 				membros.remove(remetenteVirtual);
 
 				for (InfoUser u : membros) {
@@ -245,9 +261,11 @@ public class GerenciadorGrupos {
 						java.net.InetAddress ipDest = java.net.InetAddress.getByName(u.getIp());
 						java.net.DatagramPacket pacote = new java.net.DatagramPacket(dados, dados.length, ipDest, u.getPorta());
 						socketUDP.send(pacote);
-					} catch (Exception e) {}
+					} catch (Exception e) {
+					}
 				}
-				System.out.println("[GERENCIADOR] [INFO] Mensagem de sistema (" + mensagem + ") disparada para o grupo '" + nomeGrupo + "'.");
+				System.out.println(
+						"[GERENCIADOR] [INFO] Mensagem de sistema (" + mensagem + ") disparada para o grupo '" + nomeGrupo + "'.");
 			} catch (Exception e) {
 				System.err.println("[GERENCIADOR] [ERROR] Falha ao notificar mensagem de sistema: " + e.getMessage());
 			}

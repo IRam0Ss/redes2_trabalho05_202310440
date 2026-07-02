@@ -231,7 +231,7 @@ public class ClienteGUI extends Application implements MessageListener {
 		btnVoltar.setOnAction(e -> switchView(createSplash()));
 
 		sobre.getChildren().addAll(title, contentBox, techFooter, btnVoltar);
-		
+
 		ScrollPane scroll = new ScrollPane(sobre);
 		scroll.setFitToWidth(true);
 		scroll.setStyle("-fx-background-color: transparent; -fx-background: transparent;");
@@ -429,7 +429,7 @@ public class ClienteGUI extends Application implements MessageListener {
 		// -- Secao: Grupos --
 		HBox boxGruposHeader = new HBox(8);
 		boxGruposHeader.setAlignment(Pos.CENTER_LEFT);
-		
+
 		Label lblGrupos = new Label("GRUPOS");
 		lblGrupos.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
 		lblGrupos.setTextFill(Color.web("#3f4a23"));
@@ -438,15 +438,17 @@ public class ClienteGUI extends Application implements MessageListener {
 		lblGrupos.setMaxWidth(Double.MAX_VALUE);
 
 		SVGPath searchIconGroups = new SVGPath();
-		searchIconGroups.setContent("M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z");
+		searchIconGroups.setContent(
+				"M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z");
 		searchIconGroups.setFill(Color.web("#8a9b3a"));
 		searchIconGroups.setStyle("-fx-cursor: hand;");
-		
+
 		boxGruposHeader.getChildren().addAll(lblGrupos, searchIconGroups);
 
 		TextField txtSearchGroups = new TextField();
 		txtSearchGroups.setPromptText("Buscar grupo...");
-		txtSearchGroups.setStyle("-fx-background-color: rgba(255, 255, 255, 0.85); -fx-background-radius: 20px; -fx-padding: 6px 15px; -fx-font-size: 13.5px; -fx-text-fill: #1a1e0b; -fx-prompt-text-fill: #555555;");
+		txtSearchGroups.setStyle(
+				"-fx-background-color: rgba(255, 255, 255, 0.85); -fx-background-radius: 20px; -fx-padding: 6px 15px; -fx-font-size: 13.5px; -fx-text-fill: #1a1e0b; -fx-prompt-text-fill: #555555;");
 		txtSearchGroups.setVisible(false);
 		txtSearchGroups.setManaged(false);
 
@@ -454,14 +456,17 @@ public class ClienteGUI extends Application implements MessageListener {
 			boolean vis = txtSearchGroups.isVisible();
 			txtSearchGroups.setVisible(!vis);
 			txtSearchGroups.setManaged(!vis);
-			if (!vis) txtSearchGroups.requestFocus();
-			else txtSearchGroups.clear();
+			if (!vis)
+				txtSearchGroups.requestFocus();
+			else
+				txtSearchGroups.clear();
 		});
 
 		txtSearchGroups.textProperty().addListener((obs, oldVal, newVal) -> {
 			String lower = newVal.toLowerCase();
 			filteredGroups.setPredicate(item -> {
-				if (newVal == null || newVal.isEmpty()) return true;
+				if (newVal == null || newVal.isEmpty())
+					return true;
 				return item.toLowerCase().contains(lower);
 			});
 		});
@@ -514,7 +519,7 @@ public class ClienteGUI extends Application implements MessageListener {
 		// -- Secao: Usuarios Online --
 		HBox boxUsersHeader = new HBox(8);
 		boxUsersHeader.setAlignment(Pos.CENTER_LEFT);
-		
+
 		Label lblUsers = new Label("USUARIOS ONLINE");
 		lblUsers.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
 		lblUsers.setTextFill(Color.web("#3f4a23"));
@@ -523,15 +528,17 @@ public class ClienteGUI extends Application implements MessageListener {
 		lblUsers.setMaxWidth(Double.MAX_VALUE);
 
 		SVGPath searchIconUsers = new SVGPath();
-		searchIconUsers.setContent("M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z");
+		searchIconUsers.setContent(
+				"M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z");
 		searchIconUsers.setFill(Color.web("#8a9b3a"));
 		searchIconUsers.setStyle("-fx-cursor: hand;");
-		
+
 		boxUsersHeader.getChildren().addAll(lblUsers, searchIconUsers);
 
 		TextField txtSearchUsers = new TextField();
 		txtSearchUsers.setPromptText("Buscar usu\u00E1rio...");
-		txtSearchUsers.setStyle("-fx-background-color: rgba(255, 255, 255, 0.85); -fx-background-radius: 20px; -fx-padding: 6px 15px; -fx-font-size: 13.5px; -fx-text-fill: #1a1e0b; -fx-prompt-text-fill: #555555;");
+		txtSearchUsers.setStyle(
+				"-fx-background-color: rgba(255, 255, 255, 0.85); -fx-background-radius: 20px; -fx-padding: 6px 15px; -fx-font-size: 13.5px; -fx-text-fill: #1a1e0b; -fx-prompt-text-fill: #555555;");
 		txtSearchUsers.setVisible(false);
 		txtSearchUsers.setManaged(false);
 
@@ -539,14 +546,17 @@ public class ClienteGUI extends Application implements MessageListener {
 			boolean vis = txtSearchUsers.isVisible();
 			txtSearchUsers.setVisible(!vis);
 			txtSearchUsers.setManaged(!vis);
-			if (!vis) txtSearchUsers.requestFocus();
-			else txtSearchUsers.clear();
+			if (!vis)
+				txtSearchUsers.requestFocus();
+			else
+				txtSearchUsers.clear();
 		});
 
 		txtSearchUsers.textProperty().addListener((obs, oldVal, newVal) -> {
 			String lower = newVal.toLowerCase();
 			filteredUsers.setPredicate(item -> {
-				if (newVal == null || newVal.isEmpty()) return true;
+				if (newVal == null || newVal.isEmpty())
+					return true;
 				return item.toLowerCase().contains(lower);
 			});
 		});
@@ -615,7 +625,8 @@ public class ClienteGUI extends Application implements MessageListener {
 		});
 
 		Button btnTutorial = new Button("? Iniciar Tutorial");
-		btnTutorial.setStyle("-fx-background-color: linear-gradient(to bottom, #a4b455, #8a9b3a); -fx-text-fill: #1a1e0b; -fx-font-size: 11px; -fx-padding: 6px 12px; -fx-background-radius: 20px; -fx-cursor: hand; -fx-font-weight: bold; -fx-border-color: #5b6623; -fx-border-radius: 20px; -fx-border-width: 1px;");
+		btnTutorial.setStyle(
+				"-fx-background-color: linear-gradient(to bottom, #a4b455, #8a9b3a); -fx-text-fill: #1a1e0b; -fx-font-size: 11px; -fx-padding: 6px 12px; -fx-background-radius: 20px; -fx-cursor: hand; -fx-font-weight: bold; -fx-border-color: #5b6623; -fx-border-radius: 20px; -fx-border-width: 1px;");
 		btnTutorial.setMaxWidth(Double.MAX_VALUE);
 		addHoverScale(btnTutorial);
 
@@ -655,14 +666,14 @@ public class ClienteGUI extends Application implements MessageListener {
 		emptyStateBox = new VBox(15);
 		emptyStateBox.setAlignment(Pos.CENTER);
 		emptyStateBox.setMouseTransparent(true);
-		
+
 		Label lblEmpty = new Label("Selecione um canal seguro para iniciar a transmissao...");
 		lblEmpty.setFont(Font.font("Consolas", 14));
 		lblEmpty.setTextFill(Color.web("#8a9b3a"));
 		emptyStateBox.getChildren().add(lblEmpty);
 
 		StackPane chatContainer = new StackPane();
-		
+
 		// Marca d'agua permanente no fundo do chat
 		try {
 			ImageView chatWatermark = new ImageView(new Image(getClass().getResourceAsStream("/view/edenIcon.png")));
@@ -715,38 +726,31 @@ public class ClienteGUI extends Application implements MessageListener {
 			steps.add(new TutorialOverlay.TutorialStep(
 					sidebar,
 					"Diretrizes do Jardim",
-					"Bem-vindo ao E.D.E.N.. Esta e a sua interface de comunicacao secreta. Siga este breve tutorial para entender as funcionalidades principais e se familiarizar com a sua estacao de trabalho."
-			));
+					"Bem-vindo ao E.D.E.N.. Esta e a sua interface de comunicacao secreta. Siga este breve tutorial para entender as funcionalidades principais e se familiarizar com a sua estacao de trabalho."));
 			steps.add(new TutorialOverlay.TutorialStep(
 					groupList,
 					"Seus Grupos",
-					"Nesta area ficam os grupos que voce participa. O E.D.E.N. organiza as comunicacoes em salas protegidas para que possamos coordenar nossas acoes de maneira isolada."
-			));
+					"Nesta area ficam os grupos que voce participa. O E.D.E.N. organiza as comunicacoes em salas protegidas para que possamos coordenar nossas acoes de maneira isolada."));
 			steps.add(new TutorialOverlay.TutorialStep(
 					grpBtns,
 					"Acoes de Grupos",
-					"Use estes botoes para 'Criar' ou 'Entrar' em novos grupos, ou para 'Sair' de um grupo que voce nao precisa mais acompanhar."
-			));
+					"Use estes botoes para 'Criar' ou 'Entrar' em novos grupos, ou para 'Sair' de um grupo que voce nao precisa mais acompanhar."));
 			steps.add(new TutorialOverlay.TutorialStep(
 					grpBtns2,
 					"Lista Global",
-					"Este botao solicita ao servidor a lista completa de todos os grupos ativos no momento. Util para descobrir novas frentes de acao."
-			));
+					"Este botao solicita ao servidor a lista completa de todos os grupos ativos no momento. Util para descobrir novas frentes de acao."));
 			steps.add(new TutorialOverlay.TutorialStep(
 					onlineUsersList,
 					"Agentes Online",
-					"Esta area exibe todos os outros clientes (agentes) atualmente conectados ao servidor. Voce pode clicar em um nome para iniciar um canal de comunicacao direta e privada (PVT)."
-			));
+					"Esta area exibe todos os outros clientes (agentes) atualmente conectados ao servidor. Voce pode clicar em um nome para iniciar um canal de comunicacao direta e privada (PVT)."));
 			steps.add(new TutorialOverlay.TutorialStep(
 					boxUsersHeader,
 					"Busca de Agentes e Grupos",
-					"Clicando no icone de lupa ao lado dos titulos, voce pode pesquisar e filtrar rapidamente por um agente ou grupo especifico nas listas."
-			));
+					"Clicando no icone de lupa ao lado dos titulos, voce pode pesquisar e filtrar rapidamente por um agente ou grupo especifico nas listas."));
 			steps.add(new TutorialOverlay.TutorialStep(
 					inputBar,
 					"Transmissao",
-					"Esta e a sua barra de transmissao. Digite suas mensagens aqui e envie para o grupo ou agente que estiver selecionado. A comunicacao aqui e vital."
-			));
+					"Esta e a sua barra de transmissao. Digite suas mensagens aqui e envie para o grupo ou agente que estiver selecionado. A comunicacao aqui e vital."));
 
 			TutorialOverlay overlay = new TutorialOverlay(root, steps);
 			overlay.start();
@@ -960,10 +964,12 @@ public class ClienteGUI extends Application implements MessageListener {
 
 	private void switchChatTo(String chatId) {
 		currentChat = chatId;
-		
+
 		// Hide empty state and show scroll
-		if (emptyStateBox != null) emptyStateBox.setVisible(false);
-		if (chatScroll != null) chatScroll.setVisible(true);
+		if (emptyStateBox != null)
+			emptyStateBox.setVisible(false);
+		if (chatScroll != null)
+			chatScroll.setVisible(true);
 
 		// Clear unread counts for this chat
 		if (unreadCounts.containsKey(chatId)) {
@@ -1201,7 +1207,7 @@ public class ClienteGUI extends Application implements MessageListener {
 		membersList.setStyle("-fx-background-color: rgba(160,176,80,0.2); -fx-background-radius: 8px;");
 
 		StackPane overlay = new StackPane();
-		
+
 		Runnable closeOverlay = () -> {
 			FadeTransition fadeOut = new FadeTransition(Duration.millis(200), overlay);
 			fadeOut.setFromValue(1);
@@ -1226,30 +1232,31 @@ public class ClienteGUI extends Application implements MessageListener {
 					lblName.setFont(Font.font("Segoe UI", FontWeight.BOLD, 13));
 					HBox.setHgrow(lblName, Priority.ALWAYS);
 					lblName.setMaxWidth(Double.MAX_VALUE);
-					
+
 					cellBox.getChildren().add(lblName);
 
 					if (!item.contains("(Voc\u00EA)")) {
 						SVGPath pvtIcon = new SVGPath();
-						pvtIcon.setContent("M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"); 
+						pvtIcon.setContent("M2.01 21L23 12 2.01 3 2 10l15 2-15 2z");
 						pvtIcon.setFill(Color.web("#5b6623"));
-						
+
 						Button btnPvt = new Button();
 						btnPvt.setGraphic(pvtIcon);
 						btnPvt.setStyle("-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0;");
 						addHoverScale(btnPvt);
-						
+
 						btnPvt.setOnAction(e -> {
 							closeOverlay.run();
 							groupList.getSelectionModel().clearSelection();
 							switchChatTo("[PVT] " + item);
 						});
-						
+
 						cellBox.getChildren().add(btnPvt);
 					}
-					
+
 					setGraphic(cellBox);
-					setStyle("-fx-background-color: transparent; -fx-padding: 8px; -fx-border-color: #8a9b3a; -fx-border-width: 0 0 1px 0;");
+					setStyle(
+							"-fx-background-color: transparent; -fx-padding: 8px; -fx-border-color: #8a9b3a; -fx-border-width: 0 0 1px 0;");
 				}
 			}
 		});
@@ -1270,7 +1277,8 @@ public class ClienteGUI extends Application implements MessageListener {
 			} else {
 				Set<String> members = knownGroupMembers.getOrDefault(grupo, new HashSet<>());
 				for (String m : members) {
-					if (!m.equals(eu.getNome())) membersList.getItems().add(m);
+					if (!m.equals(eu.getNome()))
+						membersList.getItems().add(m);
 				}
 			}
 		}
